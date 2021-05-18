@@ -6,19 +6,9 @@
 [![tests](https://github.com/sofroniewn/waver/workflows/tests/badge.svg)](https://github.com/sofroniewn/waver/actions)
 [![codecov](https://codecov.io/gh/sofroniewn/waver/branch/master/graph/badge.svg)](https://codecov.io/gh/sofroniewn/waver)
 
-Wave simulations and inversions
+Wave simulations and inversions (Under Construction!)
 
 ----------------------------------
-
-This [napari] plugin was generated with [Cookiecutter] using with [@napari]'s [cookiecutter-napari-plugin] template.
-
-<!--
-Don't miss the full getting started guide to set up your new package:
-https://github.com/napari/cookiecutter-napari-plugin#getting-started
-
-and review the napari docs for plugin developers:
-https://napari.org/docs/plugins/index.html
--->
 
 ## Installation
 
