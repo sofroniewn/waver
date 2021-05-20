@@ -15,7 +15,7 @@ class Grid(NamedTuple):
     speed : float or array
         Speed of the wave in meters per second. If a float then
         speed is assumed constant across the whole grid. If an
-        array then must be the same shape as the shape of the grid.
+        array then must be the same shape as the grid.
     """
     size: Tuple[float, ...]
     spacing: float

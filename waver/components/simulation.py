@@ -4,6 +4,7 @@ from tqdm import tqdm
 from ._grid import Grid
 from ._source import Source
 from ._time import Time
+from ._wave import wave_equantion_update
 
 
 class Simulation:
@@ -26,7 +27,7 @@ class Simulation:
         speed : float or array
             Speed of the wave in meters per second. If a float then
             speed is assumed constant across the whole grid. If an
-            array then must be the same shape as the shape of the grid.
+            array then must be the same shape as the grid.
         duration : float
             Length of the simulation in seconds.
         """
@@ -34,18 +35,17 @@ class Simulation:
 
         # Calculate the theoretically optical courant number
         # given the dimensionality of the grid
-        courant_number = float(self.grid.ndim) ** (0.5)
+        courant_number = 0.9 / float(self.grid.ndim) ** (0.5)
 
         # Based on the counrant number and the maximum speed
         # calculate the largest stable time step
         max_speed = np.max(self.grid.speed)
-        max_step = courant_number * self.grid.spacing / max_speed
+        max_step = courant_number * self.grid.spacing / max_speed 
 
         # Round step, i.e. 5.047e-7 => 5e-7
         power =  np.power(10, np.floor(np.log10(max_step)))
         coef = int(np.floor(max_step / power))
         step = coef * power
-
         self._time = Time(step, duration)
 
         self._wave = np.zeros((self.time.nsteps,) + self.grid.shape)
@@ -87,12 +87,19 @@ class Simulation:
             raise ValueError('Please add a source before running, use Simulation.add_source()')
 
         for current_step in tqdm(range(self.time.nsteps)):
-            current_time = self.time.step * current_step
-            # Not this is not the actual wave equation!
-            self._wave[current_step] = self.source.value(current_time)
+            # Take wave to be zero for first two time steps 
+            if current_step >= 2:
+                current_time = self.time.step * current_step
+                self._wave[current_step] = wave_equantion_update(U_1=self._wave[current_step - 1], 
+                                                                    U_0=self._wave[current_step - 2],
+                                                                    c=self.grid.speed,
+                                                                    Q_1=self.source.value(current_time),
+                                                                    dt=self.time.step,
+                                                                    dx=self.grid.spacing
+                                                                )
         self._run = True
 
-    def add_source(self, *, location, frequency, ncycles=None, phase=0,):
+    def add_source(self, *, location, period, ncycles=None, phase=0,):
         """Add a source to the simulaiton.
         
         Note this must be done before the simulation can be run.
@@ -109,8 +116,8 @@ class Simulation:
             point source in 3D at the point x=10cm, y=20cm, z=10cm. A source of
             `(0.1, None, 0.1)` is a line source in 3D at x=10cm, z=10cm extending
             the full length of y.
-        frequency : float
-            Frequency of the source in cycles per second.
+        period : float
+            Period of the source in seconds.
         ncycles : int or None
             If None, source is considered to be continous, otherwise
             it will only run for ncycles.
@@ -118,14 +125,12 @@ class Simulation:
             Phase offset of the source in radians.
         """
         self._run = False
-        self._source = Source(
-                              location=location,
+        self._source = Source(location=location,
                               shape=self.grid.shape,
                               spacing=self.grid.spacing,
-                              frequency=frequency,
+                              period=period,
                               ncycles=ncycles,
-                              phase=phase,
-                             )
+                              phase=phase)
 
     def set_boundaries(boundaries):
         """Set boundary conditions

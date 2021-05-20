@@ -27,8 +27,8 @@ class Source(NamedTuple):
     spacing : float
         Spacing of the grid in meters. The grid is assumed to be
         isotropic, all dimensions use the same spacing.
-    frequency : float
-        Frequency of the source in cycles per second.
+    period : float
+        Period of the source in seconds.
     ncycles : int or None
         If None, source is considered to be continous, otherwise
         it will only run for ncycles.
@@ -38,7 +38,7 @@ class Source(NamedTuple):
     location: tuple
     shape: tuple
     spacing: tuple
-    frequency: float
+    period: float
     ncycles: int
     phase: float
 
@@ -69,8 +69,8 @@ class Source(NamedTuple):
         float
             Value of the source at that moment in time.
         """
-        if self.ncycles is None or time * self.frequency <= self.ncycles:
-            return np.sin(2 * np.pi * time * self.frequency + self.phase)
+        if self.ncycles is None or time / self.period <= self.ncycles:
+            return np.sin(2 * np.pi * time / self.period + self.phase)
         else:
             return 0
 

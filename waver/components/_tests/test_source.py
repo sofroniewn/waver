@@ -12,12 +12,12 @@ def test_source():
     source = Source(location=location,
                     shape=shape,
                     spacing=spacing,
-                    frequency=10,
+                    period=0.1,
                     phase=0,
                     ncycles=None)
 
     assert np.all(source.weight == weight)
-    assert source.frequency == 10
+    assert source.period == 0.1
     assert source.phase == 0
     assert source.ncycles is None
 
@@ -48,12 +48,12 @@ def test_pulsed_source():
     source = Source(location=location,
                     shape=shape,
                     spacing=spacing,
-                    frequency=10,
+                    period=0.1,
                     phase=0,
                     ncycles=5)
 
     assert np.all(source.weight == weight)
-    assert source.frequency == 10
+    assert source.period == 0.1
     assert source.phase == 0
     assert source.ncycles == 5
 
@@ -80,12 +80,12 @@ def test_spatial_source():
     source = Source(location=location,
                     shape=shape,
                     spacing=spacing,
-                    frequency=10,
+                    period=0.1,
                     phase=0,
                     ncycles=None)
 
     assert np.all(source.weight == weight)
-    assert source.frequency == 10
+    assert source.period == 0.1
     assert source.phase == 0
     assert source.ncycles is None
 

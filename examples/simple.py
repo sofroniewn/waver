@@ -2,10 +2,10 @@ from waver.components import Simulation
 import napari
 
 # Create simulation
-sim = Simulation(size=(0.1, 0.1), spacing=1e-3, speed=343, duration=1e-2)
+sim = Simulation(size=(1e-4, 1e-2), spacing=1e-5, speed=343, duration=1e-5)
 
 # Add the source
-sim.add_source(location=(0, None), frequency=10)
+sim.add_source(location=(None, 0), frequency=1e6)
 # Run simulation
 sim.run()
 
