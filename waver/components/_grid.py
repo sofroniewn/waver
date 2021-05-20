@@ -12,14 +12,9 @@ class Grid(NamedTuple):
     spacing : float
         Spacing of the grid in meters. The grid is assumed to be
         isotropic, all dimensions use the same spacing.
-    speed : float or array
-        Speed of the wave in meters per second. If a float then
-        speed is assumed constant across the whole grid. If an
-        array then must be the same shape as the grid.
     """
     size: Tuple[float, ...]
     spacing: float
-    speed: float
 
     @property
     @lru_cache(1)

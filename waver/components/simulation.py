@@ -31,7 +31,8 @@ class Simulation:
         duration : float
             Length of the simulation in seconds.
         """
-        self._grid = Grid(size, spacing, speed)
+        self._grid = Grid(size=size, spacing=spacing)
+        self._speed = speed
 
         # Calculate the theoretically optical courant number
         # given the dimensionality of the grid
@@ -39,14 +40,14 @@ class Simulation:
 
         # Based on the counrant number and the maximum speed
         # calculate the largest stable time step
-        max_speed = np.max(self.grid.speed)
+        max_speed = np.max(self.speed)
         max_step = courant_number * self.grid.spacing / max_speed 
 
         # Round step, i.e. 5.047e-7 => 5e-7
         power =  np.power(10, np.floor(np.log10(max_step)))
         coef = int(np.floor(max_step / power))
         step = coef * power
-        self._time = Time(step, duration)
+        self._time = Time(step=step, duration=duration)
 
         self._wave = np.zeros((self.time.nsteps,) + self.grid.shape)
         self._source = None
@@ -61,6 +62,11 @@ class Simulation:
     def time(self):
         """Time: Time that simulation is defined over."""
         return self._time
+    
+    @property
+    def speed(self):
+        """Array or float: Speed of the wave in meters per second."""
+        return self._speed
 
     @property
     def source(self):
@@ -92,7 +98,7 @@ class Simulation:
                 current_time = self.time.step * current_step
                 self._wave[current_step] = wave_equantion_update(U_1=self._wave[current_step - 1], 
                                                                     U_0=self._wave[current_step - 2],
-                                                                    c=self.grid.speed,
+                                                                    c=self.speed,
                                                                     Q_1=self.source.value(current_time),
                                                                     dt=self.time.step,
                                                                     dx=self.grid.spacing
