@@ -6,6 +6,7 @@ from waver.components import Simulation
 speed = 343 * np.ones((399,))
 speed[100:150] = 2*343
 speed[200:220] = 0.5*343
+speed[250:280] = 1.5*343
 # Create simulation, 4mm x 4mm, 10um spacing, for 10us
 sim = Simulation(size=(4e-3,), spacing=1e-5, speed=speed, duration=15e-6)
 # Report the simulation timestep (10ns in this case)
@@ -23,8 +24,8 @@ viewer.add_image(-(np.expand_dims(sim.speed, axis=(0, )) - 343) / 4, colormap='b
 viewer.add_image(np.expand_dims(-sim.wave[::5], axis=1), colormap='PiYG', opacity=0.9, contrast_limits=(-1.5, 1.5))
 
 # # Add simulated endpoints timeseries
-# viewer.add_image(10*np.expand_dims(-sim.wave[:, 0], axis=0), colormap='PiYG', opacity=0.9, contrast_limits=(-1.5, 1.5))
-# viewer.add_image(50 + 10*np.expand_dims(-sim.wave[:, -1], axis=0), colormap='PiYG', opacity=0.9, contrast_limits=(-1.5, 1.5))
+viewer.add_image(500 + 10*np.expand_dims(-sim.wave[:, 0], axis=0), colormap='PiYG', opacity=0.9, contrast_limits=(-1.5, 1.5))
+viewer.add_image(500 + 100 + 10*np.expand_dims(-sim.wave[:, -1], axis=0), colormap='PiYG', opacity=0.9, contrast_limits=(-1.5, 1.5))
 
 # Set to 1D plotting
 viewer.dims.ndisplay = 1
