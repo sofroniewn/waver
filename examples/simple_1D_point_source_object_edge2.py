@@ -18,17 +18,18 @@ sim.run()
 
 # Create a napari viewer
 viewer = napari.Viewer()
+viewer.dims.axis_labels = 'tx'
 
-viewer.add_image(sim.wave[::5], colormap='PiYG', contrast_limits=(-15, 15))
+viewer.add_image(-sim.wave[::5], colormap='PiYG', contrast_limits=(-15, 15), name='wave')
 
 full_speed = (np.repeat([sim.speed], 500, axis=0) - 343) / 343
 cmap = napari.utils.Colormap([[0, 0, 0, 1], [0, 0, 0, 0], [0, 0, 0, 1]], name='custom')
-viewer.add_image(full_speed, colormap=cmap, contrast_limits=(-2, 2))
+viewer.add_image(-30*full_speed, colormap=cmap, contrast_limits=(-2, 2), name='speed')
 
 mask = np.zeros((500, 500))
 mask[:, 50:-50] = 1
 cmap2 = napari.utils.Colormap([[0, 0, 0, 0], [0, 0, 0, 1]], name='mask')
-viewer.add_image(mask, colormap=cmap2, contrast_limits=(0, 1))
+viewer.add_image(mask, colormap=cmap2, contrast_limits=(0, 1), visible=False)
 
 # # Add simulated wave, speed and source
 # viewer.add_image(-(np.expand_dims(sim.speed, axis=(0, )) - 343) / 4, colormap='bop orange')
