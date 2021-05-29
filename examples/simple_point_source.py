@@ -1,5 +1,5 @@
 import napari
-from waver.components import Simulation
+from waver.simulation import Simulation
 
 
 # Create simulation

@@ -50,6 +50,7 @@ class Simulation:
         self._time = Time(step=step, duration=duration)
 
         self._wave = np.zeros((self.time.nsteps,) + self.grid.shape)
+        self._source_array = np.zeros((self.time.nsteps,) + self.grid.shape)
         self._source = None
         self._run = False
 
@@ -74,7 +75,7 @@ class Simulation:
         if self._source is None:
             raise ValueError('Please add a source before running, use Simulation.add_source()')
         else:
-            return self._source
+            return self._source_array
 
     @property
     def wave(self):
@@ -84,22 +85,31 @@ class Simulation:
         else:
             raise ValueError('Simulation must be run first, use Simulation.run()')
 
-    def run(self):
+    def run(self, *, progress=True):
         """Run the simulation.
         
         Note a source must be added before the simulation can be run.
+
+        Parameters
+        ----------
+        progress : bool, optional
+            Show progress bar or not.
         """
         if self._source is None:
             raise ValueError('Please add a source before running, use Simulation.add_source()')
 
-        for current_step in tqdm(range(self.time.nsteps)):
+        for current_step in tqdm(range(self.time.nsteps), disable=not progress, leave=False):
             # Take wave to be zero for first two time steps 
             if current_step >= 2:
                 current_time = self.time.step * current_step
+                # Save source values
+                self._source_array[current_step] = self._source.value(current_time)
+
+                # Save wave values
                 self._wave[current_step] = wave_equantion_update(U_1=self._wave[current_step - 1], 
                                                                     U_0=self._wave[current_step - 2],
                                                                     c=self.speed,
-                                                                    Q_1=self.source.value(current_time),
+                                                                    Q_1=self._source_array[current_step],
                                                                     dt=self.time.step,
                                                                     dx=self.grid.spacing
                                                                 )

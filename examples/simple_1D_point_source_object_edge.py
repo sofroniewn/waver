@@ -1,6 +1,6 @@
 import numpy as np
 import napari
-from waver.components import Simulation
+from waver.simulation import Simulation
 
 # Define variable speed matrix
 speed = 343 * np.ones((399,))
