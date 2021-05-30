@@ -1,6 +1,6 @@
 import numpy as np
 import napari
-from waver.components import Simulation
+from waver.simulation import Simulation
 
 # Define variable speed matrix
 speed = 343 * np.ones((500,))
@@ -8,11 +8,11 @@ speed[100:150] = 2*343
 speed[200:220] = 0.5*343
 speed[250:280] = 1.5*343
 # Create simulation, 10cm, 100um spacing, for 100us
-sim = Simulation(size=(5e-2,), spacing=1e-4, speed=speed, duration=25e-5)
+sim = Simulation(size=(5e-2,), spacing=1e-4, speed=speed, duration=25e-5, max_speed=686)
 # Report the simulation timestep (10ns in this case)
 print('Time step in (s) is ', sim.time.step)
 # Add a point source in at the left edge, 1MHz pulse for 1us
-sim.add_source(location=(1e-4,), period=1e-5, ncycles=1)
+sim.add_source(location=(0,), period=1e-5, ncycles=1)
 # Run simulation
 sim.run()
 
@@ -20,9 +20,9 @@ sim.run()
 viewer = napari.Viewer()
 viewer.dims.axis_labels = 'tx'
 
-viewer.add_image(-sim.wave[::5], colormap='PiYG', contrast_limits=(-15, 15), name='wave')
+viewer.add_image(-sim.wave, colormap='PiYG', contrast_limits=(-15, 15), name='wave')
 
-full_speed = (np.repeat([sim.speed], 500, axis=0) - 343) / 343
+full_speed = (sim.full_speed - 343) / 343
 cmap = napari.utils.Colormap([[0, 0, 0, 1], [0, 0, 0, 0], [0, 0, 0, 1]], name='custom')
 viewer.add_image(-30*full_speed, colormap=cmap, contrast_limits=(-2, 2), name='speed')
 

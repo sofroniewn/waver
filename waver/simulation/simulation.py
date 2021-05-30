@@ -14,7 +14,7 @@ class Simulation:
     conditions, but is driven by a source. Therefore the `add_source`
     method must be called before the simulation can be `run`.
     """
-    def __init__(self, *, size, spacing, speed, duration):
+    def __init__(self, *, size, spacing, speed, duration, max_speed=None):
         """
         Parameters
         ----------
@@ -28,6 +28,9 @@ class Simulation:
             Speed of the wave in meters per second. If a float then
             speed is assumed constant across the whole grid. If an
             array then must be the same shape as the grid.
+        max_speed : float, optional
+            Maximum speed of the wave in meters per second. If passed then
+            this speed will be used to derive timestep.
         duration : float
             Length of the simulation in seconds.
         """
@@ -40,7 +43,9 @@ class Simulation:
 
         # Based on the counrant number and the maximum speed
         # calculate the largest stable time step
-        max_speed = np.max(self.speed)
+        if max_speed is None:
+            max_speed = np.max(self.speed)
+
         max_step = courant_number * self.grid.spacing / max_speed 
 
         # Round step, i.e. 5.047e-7 => 5e-7
@@ -50,6 +55,8 @@ class Simulation:
         self._time = Time(step=step, duration=duration)
 
         self._wave = np.zeros((self.time.nsteps,) + self.grid.shape)
+        self._source_array = np.zeros((self.time.nsteps,) + self.grid.shape)
+        self._speed_array = np.zeros((self.time.nsteps,) + self.grid.shape)
         self._source = None
         self._run = False
 
@@ -70,11 +77,19 @@ class Simulation:
 
     @property
     def source(self):
-        """Source: Source that drives simulation."""
-        if self._source is None:
-            raise ValueError('Please add a source before running, use Simulation.add_source()')
+        """array: Array for the source."""
+        if self._run:
+            return self._source_array
         else:
-            return self._source
+            raise ValueError('Simulation must be run first, use Simulation.run()')
+
+    @property
+    def full_speed(self):
+        """array: Array for the speed."""
+        if self._run:
+            return self._speed_array
+        else:
+            raise ValueError('Simulation must be run first, use Simulation.run()')
 
     @property
     def wave(self):
@@ -84,24 +99,39 @@ class Simulation:
         else:
             raise ValueError('Simulation must be run first, use Simulation.run()')
 
-    def run(self):
+    def run(self, *, progress=True):
         """Run the simulation.
         
         Note a source must be added before the simulation can be run.
+
+        Parameters
+        ----------
+        progress : bool, optional
+            Show progress bar or not.
         """
+        # Reset wave to 0
+        self._wave *= 0
+
         if self._source is None:
             raise ValueError('Please add a source before running, use Simulation.add_source()')
 
-        for current_step in tqdm(range(self.time.nsteps)):
+        for current_step in tqdm(range(self.time.nsteps), disable=not progress, leave=False):
             # Take wave to be zero for first two time steps 
-            if current_step >= 2:
-                current_time = self.time.step * current_step
-                self._wave[current_step] = wave_equantion_update(U_1=self._wave[current_step - 1], 
-                                                                    U_0=self._wave[current_step - 2],
-                                                                    c=self.speed,
-                                                                    Q_1=self.source.value(current_time),
-                                                                    dt=self.time.step,
-                                                                    dx=self.grid.spacing
+            current_time = self.time.step * current_step
+
+            # Save source values
+            self._speed_array[current_step] = self.speed
+
+            # Save source values
+            self._source_array[current_step] = self._source.value(current_time)
+
+            # Save wave values
+            self._wave[current_step] = wave_equantion_update(U_1=self._wave[current_step - 1], 
+                                                                U_0=self._wave[current_step - 2],
+                                                                c=self.speed,
+                                                                Q_1=self._source_array[current_step],
+                                                                dt=self.time.step,
+                                                                dx=self.grid.spacing
                                                                 )
         self._run = True
 

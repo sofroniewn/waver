@@ -38,7 +38,7 @@ def wave_equantion_update(U_1, U_0, c, Q_1, dt, dx, boundary='open'):
     U_2 : array
         Value of the wave at the next time point.
     """
-    U_2 = 2 * U_1 - U_0 + (c * dt / dx)**2 * laplace(U_1, mode='constant') + Q_1
+    U_2 = 2 * U_1 - U_0 + (c * dt / dx)**2 * laplace(U_1, mode='constant')
 
     if boundary == 'open':
         # Enforce open boundary condition
@@ -52,5 +52,8 @@ def wave_equantion_update(U_1, U_0, c, Q_1, dt, dx, boundary='open'):
                 index[boundary] = edge
                 index = tuple(index)
                 U_2[index] = U_1[index] + sign * (c[index] * dt / dx) * grad[index]
+
+    # Add forceing function, after boundary condition met
+    U_2 = U_2 + Q_1
 
     return U_2
