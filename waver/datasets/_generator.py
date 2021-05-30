@@ -48,7 +48,7 @@ def generate_simulation_datasets(*, path, splits, runs, seed=0, size, spacing, d
     np.random.seed(seed)
 
     # Create datasets folder
-    path = Path(path) / f'wave_simulation_{seed}'
+    path = Path(path) / f'wave_simulation_{seed}_{speed}'
     path.mkdir(exist_ok=True)
 
     # Move through splits
@@ -132,7 +132,6 @@ def generate_simulation_dataset(*, path, runs, size, spacing, duration, speed, s
     # Generate array containers
     full_simulation_shape = (runs, len(sources), time_nsteps) + tuple(grid_shape)
     full_simulation_chunks = (1, 1) + (64,) * (len(grid_shape) + 1)
-    print('aaa', full_simulation_shape, full_simulation_chunks)
 
     speed_array = dataset.zeros('speed', shape=full_simulation_shape, chunks=full_simulation_chunks)
     wave_array = dataset.zeros('wave', shape=full_simulation_shape, chunks=full_simulation_chunks)
@@ -146,7 +145,6 @@ def generate_simulation_dataset(*, path, runs, size, spacing, duration, speed, s
 
         # Move through sources
         for j, source in enumerate(tqdm(sources, leave=False)):
-
             # Create a new simulation
             sim = Simulation(size=size, spacing=spacing, speed=speed_on_grid, duration=duration, max_speed=speed_range[1])
 

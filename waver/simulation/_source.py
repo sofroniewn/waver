@@ -46,7 +46,7 @@ class Source(NamedTuple):
     @lru_cache(1)
     def index(self):
         """tuple of int: Location of source in grid."""
-        return location_to_index(self.location, self.spacing)
+        return location_to_index(self.location, self.spacing, self.shape)
 
     @property
     @lru_cache(1)

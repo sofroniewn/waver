@@ -4,7 +4,7 @@ from waver import datasets
 from waver.datasets import load_simulation_dataset
 
 # Define root path for simulation
-path = '/Users/nsofroniew/Documents/inverting_physics/tests_001/' + 'wave_simulation_0/train.zarr'
+path = '/Users/nsofroniew/Documents/inverting_physics/tests_003/' + 'wave_simulation_0_random/train.zarr'
 
 dataset = load_simulation_dataset(path)
 

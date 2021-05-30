@@ -19,4 +19,11 @@ def sample_speed(method, grid, speed_range):
         Random speed distribution matched to the shape of
         the grid, sampled according to input method. 
     """
-    return speed_range[0] * np.ones(grid.shape)
+    if method == 'flat':
+        speed = speed_range[0] * np.ones(grid.shape)
+    elif method == 'random':
+        speed = speed_range[0] + np.random.random(grid.shape) * (speed_range[1] - speed_range[0])
+    else:
+        raise ValueError(f'Speed sampling method {method} not recognized')
+
+    return speed

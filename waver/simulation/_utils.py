@@ -1,4 +1,4 @@
-def location_to_index(location, spacing):
+def location_to_index(location, spacing, shape):
     """Convert a location to an index.
 
     Parameters
@@ -13,6 +13,8 @@ def location_to_index(location, spacing):
     spacing : float
         Spacing of the grid in meters. The grid is assumed to be
         isotropic, all dimensions use the same spacing.
+    shape : tuple of int
+        Shape of the grid. This constrains the valid indices allowed.
 
     Returns
     -------
@@ -20,5 +22,12 @@ def location_to_index(location, spacing):
         Location of source in grid. Where source is broadcast along
         the whole axis a slice is used.
     """
-    return tuple(int(loc // spacing) if loc is not None else slice(None) for loc in location)
+    index = tuple(int(loc // spacing) if loc is not None else slice(None) for loc in location)
 
+    # Ensure index is positive
+    index = tuple(max(0, ind) for ind in index)
+
+    # Ensure index is less than shape
+    index = tuple(min(s-1, ind) for s, ind in zip(shape, index))
+
+    return index

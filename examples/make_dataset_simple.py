@@ -1,27 +1,27 @@
 from waver.datasets import generate_simulation_datasets
 
 # Define root path for simulation
-path = '/Users/nsofroniew/Documents/inverting_physics/tests_001/'
+path = '/Users/nsofroniew/Documents/inverting_physics/tests_003/'
 
 # Consider train and test splits
 splits = ['train', 'test']
 runs = [70, 30]
 
-# Define a simulation, 5mm, 100um spacing, for 15us
-size = (5e-2,)
+# Define a simulation, 2.56mm, 100um spacing, for 120us
+size = (2.56e-2,)
 spacing = 1e-4
-duration = 15e-6
+duration = 12e-5
 
 # Define a speed range, min speed of sound in air
-speed_range = (343, 1000)
+speed_range = (343, 686)
 
 # Define a speed sampling method
-speed = ''
+speed = 'random'
 
 # Define sources, a single 100KHz pulse at the left and right edges
 sources = [
-    {'location':(1e-4,), 'period':1e-5, 'ncycles':1},
-    {'location':(5e-2 - 1e-4,), 'period':1e-5, 'ncycles':1},
+    {'location':(0,) * len(size), 'period':1e-5, 'ncycles':1},
+    {'location': size, 'period':1e-5, 'ncycles':1},
 ]
 
 # Generate simulation dataset according to the above configuration
