@@ -22,7 +22,7 @@ viewer.dims.axis_labels = 'tx'
 
 viewer.add_image(-sim.wave[::5], colormap='PiYG', contrast_limits=(-15, 15), name='wave')
 
-full_speed = (np.repeat([sim.speed], 500, axis=0) - 343) / 343
+full_speed = (sim.full_speed - 343) / 343
 cmap = napari.utils.Colormap([[0, 0, 0, 1], [0, 0, 0, 0], [0, 0, 0, 1]], name='custom')
 viewer.add_image(-30*full_speed, colormap=cmap, contrast_limits=(-2, 2), name='speed')
 

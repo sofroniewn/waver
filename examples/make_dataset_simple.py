@@ -1,11 +1,11 @@
-from waver.datasets import generate_simulation_dataset
+from waver.datasets import generate_simulation_datasets
 
 # Define root path for simulation
 path = '/Users/nsofroniew/Documents/inverting_physics/tests_001/'
 
 # Consider train and test splits
 splits = ['train', 'test']
-runs = [700, 300]
+runs = [70, 30]
 
 # Define a simulation, 5mm, 100um spacing, for 15us
 size = (5e-2,)
@@ -25,16 +25,16 @@ sources = [
 ]
 
 # Generate simulation dataset according to the above configuration
-dataset = generate_simulation_dataset(
-                                      path=path,
-                                      size=size,
-                                      spacing=spacing,
-                                      duration=duration,
-                                      speed_range=speed_range,
-                                      speed=speed,
-                                      sources=sources,
-                                      splits=splits,
-                                      runs=runs,
+dataset = generate_simulation_datasets(
+                                       path=path,
+                                       size=size,
+                                       spacing=spacing,
+                                       duration=duration,
+                                       speed_range=speed_range,
+                                       speed=speed,
+                                       sources=sources,
+                                       splits=splits,
+                                       runs=runs,
                                      )
 
-print(list(dataset.attrs.items()))
+print(dataset)
