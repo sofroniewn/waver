@@ -109,6 +109,7 @@ def generate_simulation_dataset(*, path, runs, size, spacing, duration, speed, s
     base_simulation = Simulation(size=size, spacing=spacing, duration=duration, speed=speed_range[1], max_speed=speed_range[1])
     grid_shape = base_simulation.grid.shape
     time_nsteps = base_simulation.time.nsteps
+    time_step = base_simulation.time.step
 
     # Create dataset
     dataset = zarr.open(path.as_posix(), mode='w')
@@ -123,6 +124,7 @@ def generate_simulation_dataset(*, path, runs, size, spacing, duration, speed, s
     dataset.attrs['spacing'] = spacing
     dataset.attrs['grid_shape'] = grid_shape
     dataset.attrs['duration'] = duration
+    dataset.attrs['time_step'] = time_step
     dataset.attrs['time_nsteps'] = time_nsteps
     dataset.attrs['speed'] = speed
     dataset.attrs['speed_range'] = speed_range
@@ -131,7 +133,7 @@ def generate_simulation_dataset(*, path, runs, size, spacing, duration, speed, s
  
     # Generate array containers
     full_simulation_shape = (runs, len(sources), time_nsteps) + tuple(grid_shape)
-    full_simulation_chunks = (1, 1) + (64,) * (len(grid_shape) + 1)
+    full_simulation_chunks = (1,) + (64,) * (len(grid_shape) + 2)
 
     speed_array = dataset.zeros('speed', shape=full_simulation_shape, chunks=full_simulation_chunks)
     wave_array = dataset.zeros('wave', shape=full_simulation_shape, chunks=full_simulation_chunks)
