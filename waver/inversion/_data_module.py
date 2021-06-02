@@ -16,10 +16,11 @@ class WaverDataModule(LightningDataModule):
     batch_size : int, optional
         Batch size.
     """
-    def __init__(self, data_dir: str = './', batch_size=32):
+    def __init__(self, data_dir: str = './', batch_size=32, predict='predict'):
         super().__init__()
         self.data_dir = Path(data_dir)
         self.batch_size = batch_size
+        self._predict = predict
 
     def prepare_data(self):
         """Skip preparing data."""
@@ -42,6 +43,15 @@ class WaverDataModule(LightningDataModule):
             self.dims_output = getattr(self, 'dims_output', self._waver_test[0][1].shape)
             self.dims = getattr(self, 'dims', self.dims_input)
 
+        if stage in (None, 'predict'):
+            try:
+                self._waver_predict = WaverSimulationDataset(self.data_dir, mode=self._predict)
+                self.dims_input = getattr(self, 'dims_input', self._waver_predict[0][0].shape)
+                self.dims_output = getattr(self, 'dims_output', self._waver_predict[0][1].shape)
+                self.dims = getattr(self, 'dims', self.dims_input)
+            except:
+                self._waver_predict = None
+
     def train_dataloader(self):
         """Return data loader for training."""
         return DataLoader(self._waver_train, batch_size=self.batch_size)
@@ -53,3 +63,7 @@ class WaverDataModule(LightningDataModule):
     def test_dataloader(self):
         """Return data loader for testing."""
         return DataLoader(self._waver_test, batch_size=self.batch_size, shuffle=False)
+
+    def predict_dataloader(self):
+        """Return data loader for prediction."""
+        return DataLoader(self._waver_predict, batch_size=128, shuffle=False)

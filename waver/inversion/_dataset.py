@@ -40,10 +40,13 @@ class WaverSimulationDataset(Dataset):
         # Speed is now in spatial steps
         speed = np.asarray(self._speed_data[index, 0, 0])
 
-        # Filter speed!!!!!!!!!
-        from scipy.signal import sosfiltfilt, butter
-        sos = butter(4, .3, output='sos')
-        speed = sosfiltfilt(sos, speed).copy()
+        # # Filter speed!!!!!!!!!
+        # from scipy.signal import sosfiltfilt, butter
+        # sos = butter(4, .3, output='sos')
+        # speed = sosfiltfilt(sos, speed).copy()
+
+        # Put speed in 0, 1 range
+        speed = (speed - 343) / 343
 
         # Shrink wave to only contain the border
         # ToDo generalize code from more than one spatial dimension

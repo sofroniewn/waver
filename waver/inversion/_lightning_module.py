@@ -58,6 +58,13 @@ class WaverInversion(LightningModule):
         self.log('val_loss', loss)
         return loss
 
+    def predict_step(self, batch, _):
+        # training_step defined the train loop.
+        # It is independent of forward
+        detected_wave, speed = batch
+        predicted_speed = self.forward(detected_wave)
+        return predicted_speed
+
     def configure_optimizers(self):
         optimizer = Adam(self.parameters(), lr=0.001)
         return optimizer

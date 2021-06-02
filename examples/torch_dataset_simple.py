@@ -1,7 +1,7 @@
 from waver.inversion._dataset import WaverSimulationDataset
 
 # Define root path for simulation
-path = '/Users/nsofroniew/Documents/inverting_physics/tests_003/' + 'wave_simulation_0_random'
+path = '/Users/nsofroniew/Documents/inverting_physics/tests_003/'
 
 ds = WaverSimulationDataset(path)
 
