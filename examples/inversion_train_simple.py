@@ -6,7 +6,7 @@ from waver.inversion._lightning_module import WaverInversion
 
 
 # Define root path for simulation
-path = '/Users/nsofroniew/Documents/inverting_physics/tests_006/' 
+path = '/Users/nsofroniew/Documents/inverting_physics/tests_008r/' 
 
 # Create WaverDataModule
 dm = WaverDataModule(path)

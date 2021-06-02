@@ -3,12 +3,12 @@ from scipy import ndimage as ndi
 from waver.datasets import generate_simulation_datasets
 
 # Define root path for simulation
-path = '/Users/nsofroniew/Documents/inverting_physics/tests_007_reduced/'
+path = '/Users/nsofroniew/Documents/inverting_physics/tests_008r/'
 
 reduced = True
 
 # Consider train and test splits
-splits = ['astro']
+splits = ['astroT']
 runs = [None]
 
 # Define a simulation, 12.8mm, 100um spacing, for 60.8us (leads to 100ns timesteps)
@@ -20,7 +20,7 @@ duration = 6.08e-5
 speed_range = (343, 686)
 
 # Define a custom speed based on an image
-full_image = data.astronaut().mean(axis=2)
+full_image = data.astronaut().mean(axis=2).T
 # full_image = data.camera()
 full_image = full_image / full_image.max()
 rescaled_image = ndi.zoom(full_image, 128/512)

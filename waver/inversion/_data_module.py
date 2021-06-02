@@ -31,7 +31,8 @@ class WaverDataModule(LightningDataModule):
         # Assign train/ val datasets for use in dataloaders
         if stage in (None, 'fit'):
             train_dataset = WaverSimulationDataset(self.data_dir, mode='train')
-            split = [int(0.9 * len(train_dataset)), int(0.1 * len(train_dataset))]
+            train_split = int(0.9 * len(train_dataset))
+            split = [train_split, len(train_dataset) - train_split]
             self._waver_train, self._waver_val = random_split(train_dataset, split)
             self.dims_input = self._waver_train[0][0].shape
             self.dims_output = self._waver_train[0][1].shape

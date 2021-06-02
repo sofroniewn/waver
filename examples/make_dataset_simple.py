@@ -1,13 +1,13 @@
 from waver.datasets import generate_simulation_datasets
 
 # Define root path for simulation
-path = '/Users/nsofroniew/Documents/inverting_physics/tests_007_full/'
+path = '/Users/nsofroniew/Documents/inverting_physics/tests_008r/'
 
-reduced = False
+reduced = True
 
 # Consider train and test splits
 splits = ['train', 'test']
-runs = [7, 3]
+runs = [7000, 3000]
 
 # Define a simulation, 12.8mm, 100um spacing, for 60.8us (leads to 100ns timesteps)
 size = (12.8e-3,)

@@ -1,11 +1,17 @@
+from glob import glob
 import napari
 
 from waver.inversion._data_module import WaverDataModule
 from waver.inversion._lightning_module import WaverInversion
 
 # Define path for simulation
-path = '/Users/nsofroniew/Documents/inverting_physics/tests_006'
-ckpt_path = path + '/lightning_logs/version_3/checkpoints/epoch=12-step=2560.ckpt'
+# path = '/Users/nsofroniew/Documents/inverting_physics/tests_006'
+# ckpt_path = path + '/lightning_logs/version_3/checkpoints/epoch=12-step=2560.ckpt'
+path = '/Users/nsofroniew/Documents/inverting_physics/tests_008r'
+ckpt_path = path + '/lightning_logs/version_1/checkpoints/*.ckpt'
+ckpt_path = glob(ckpt_path)[0]
+
+print(ckpt_path)
 
 # Create WaverDataModule
 dm = WaverDataModule(path, predict='astro')

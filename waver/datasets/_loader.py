@@ -24,17 +24,18 @@ def load_simulation_dataset(path):
     metadata = dataset.attrs.asdict()
 
     # If dataset is a full dataset return it
+    data = []
     if dataset.attrs['waver'] and dataset.attrs['dataset']:
+        data = [
+                (dataset['speed'], {'name':'speed', 'visible':False, 'metadata':metadata}),
+                (dataset['wave'], {'name':'wave', 'colormap':'PiYG', 'contrast_limits':(-2.5, 2.5), 'metadata':metadata}),
+            ]
         if 'reduced' in metadata and metadata['reduced']:
-            return [
-                    (dataset['speed'], {'name':'speed', 'visible':False, 'metadata':metadata}),
-                    (dataset['wave'], {'name':'wave', 'colormap':'PiYG', 'contrast_limits':(-2.5, 2.5), 'metadata':metadata}),
-            ]
+            return data
         else:
-            return [
+            data = data + [
                     (dataset['source'], {'name':'source', 'visible':False, 'colormap':'PiYG', 'contrast_limits':(-1, 1), 'metadata':metadata}),
-                    (dataset['speed'], {'name':'speed', 'visible':False, 'metadata':metadata}),
-                    (dataset['wave'], {'name':'wave', 'colormap':'PiYG', 'contrast_limits':(-2.5, 2.5), 'metadata':metadata}),
             ]
+            return data
     else:
         raise ValueError(f'Dataset at {path} not valid waver simulation')
