@@ -1,7 +1,7 @@
 from waver.datasets import generate_simulation_datasets
 
 # Define root path for simulation
-path = '/Users/nsofroniew/Documents/inverting_physics/tests_008r/'
+path = '/Users/nsofroniew/Documents/inverting_physics/tests_017r/'
 
 reduced = True
 
@@ -18,11 +18,15 @@ duration = 6.08e-5
 speed_range = (343, 686)
 
 # Define a speed sampling method
-speed = 'random'
+speed = 'ifft'
 
 # Define sources, a single 100KHz pulse at the left and right edges
 sources = [
+    {'location':(0,) * len(size), 'period':2e-6, 'ncycles':1},
+    {'location':(0,) * len(size), 'period':5e-6, 'ncycles':1},
     {'location':(0,) * len(size), 'period':1e-5, 'ncycles':1},
+    {'location': size, 'period':2e-6, 'ncycles':1},
+    {'location': size, 'period':5e-6, 'ncycles':1},
     {'location': size, 'period':1e-5, 'ncycles':1},
 ]
 

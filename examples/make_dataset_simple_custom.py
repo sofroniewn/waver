@@ -3,13 +3,13 @@ from scipy import ndimage as ndi
 from waver.datasets import generate_simulation_datasets
 
 # Define root path for simulation
-path = '/Users/nsofroniew/Documents/inverting_physics/tests_008r/'
+path = '/Users/nsofroniew/Documents/inverting_physics/tests_012r/'
 
 reduced = True
 
 # Consider train and test splits
-splits = ['astroT']
-runs = [None]
+splits = ['camera', 'cameraT']
+runs = [None, None]
 
 # Define a simulation, 12.8mm, 100um spacing, for 60.8us (leads to 100ns timesteps)
 size = (12.8e-3,)
@@ -20,16 +20,20 @@ duration = 6.08e-5
 speed_range = (343, 686)
 
 # Define a custom speed based on an image
-full_image = data.astronaut().mean(axis=2).T
-# full_image = data.camera()
+# full_image = data.astronaut().mean(axis=2)
+full_image = data.camera()
 full_image = full_image / full_image.max()
 rescaled_image = ndi.zoom(full_image, 128/512)
 normed_image = speed_range[0] + (speed_range[1] - speed_range[0]) * rescaled_image
-speed = [normed_image]
+speed = [normed_image, normed_image.T]
 
 # Define sources, a single 100KHz pulse at the left and right edges
 sources = [
+    {'location':(0,) * len(size), 'period':2e-6, 'ncycles':1},
+    {'location':(0,) * len(size), 'period':5e-6, 'ncycles':1},
     {'location':(0,) * len(size), 'period':1e-5, 'ncycles':1},
+    {'location': size, 'period':2e-6, 'ncycles':1},
+    {'location': size, 'period':5e-6, 'ncycles':1},
     {'location': size, 'period':1e-5, 'ncycles':1},
 ]
 
