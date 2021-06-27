@@ -22,12 +22,14 @@ def location_to_index(location, spacing, shape):
         Location of source in grid. Where source is broadcast along
         the whole axis a slice is used.
     """
-    index = tuple(int(loc // spacing) if loc is not None else slice(None) for loc in location)
+    index = tuple(int(loc // spacing) if loc is not None else None for loc in location)
 
     # Ensure index is positive
-    index = tuple(max(0, ind) for ind in index)
+    index = tuple(max(0, ind) if ind is not None else None for ind in index)
 
     # Ensure index is less than shape
-    index = tuple(min(s-1, ind) for s, ind in zip(shape, index))
+    index = tuple(min(s-1, ind) if ind is not None else None for s, ind in zip(shape, index))
+
+    index = tuple(ind if ind is not None else slice(None) for ind in index)
 
     return index

@@ -35,7 +35,7 @@ class Simulation:
             Length of the simulation in seconds.
         """
         self._grid = Grid(size=size, spacing=spacing)
-        self._speed = speed
+        self._speed = np.full(self._grid.shape, speed)
 
         # Calculate the theoretically optical courant number
         # given the dimensionality of the grid
@@ -99,7 +99,7 @@ class Simulation:
         else:
             raise ValueError('Simulation must be run first, use Simulation.run()')
 
-    def run(self, *, progress=True):
+    def run(self, *, progress=True, leave=False):
         """Run the simulation.
         
         Note a source must be added before the simulation can be run.
@@ -108,6 +108,8 @@ class Simulation:
         ----------
         progress : bool, optional
             Show progress bar or not.
+        leave : bool, optional
+            Leave progress bar or not.
         """
         # Reset wave to 0
         self._wave *= 0
@@ -115,7 +117,7 @@ class Simulation:
         if self._source is None:
             raise ValueError('Please add a source before running, use Simulation.add_source()')
 
-        for current_step in tqdm(range(self.time.nsteps), disable=not progress, leave=False):
+        for current_step in tqdm(range(self.time.nsteps), disable=not progress, leave=leave):
             # Take wave to be zero for first two time steps 
             current_time = self.time.step * current_step
 
