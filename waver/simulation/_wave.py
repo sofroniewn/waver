@@ -53,7 +53,7 @@ def wave_equantion_update(U_1, U_0, c, Q_1, dt, dx, boundary='open'):
                 index = tuple(index)
                 U_2[index] = U_1[index] + sign * (c[index] * dt / dx) * grad[index]
 
-    # Add forceing function, after boundary condition met
+    # Add forcing function, after boundary condition met
     U_2 = U_2 + Q_1
 
     return U_2

@@ -167,7 +167,6 @@ def generate_simulation_dataset(*, path, runs, size, spacing, duration, speed, s
     dataset.attrs['reduced'] = reduced
     dataset.attrs['boundary'] = boundary
 
- 
     # Generate array containers
     if reduced:
         speed_shape = (runs, ) + tuple(grid_shape)
@@ -214,7 +213,7 @@ def generate_simulation_dataset(*, path, runs, size, spacing, duration, speed, s
             sim.add_source(**source)
 
             # Run simulation
-            sim.run(progress=False)
+            sim.run()
 
             if reduced:
                 # Move through boundaries and try and extract each "recorded" signal
