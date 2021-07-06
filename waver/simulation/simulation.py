@@ -1,6 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 
+from ._detector import Detector
 from ._grid import Grid
 from ._source import Source
 from ._time import Time
@@ -13,8 +14,14 @@ class Simulation:
     The simulation is always assumed to start from zero wave initial
     conditions, but is driven by a source. Therefore the `add_source`
     method must be called before the simulation can be `run`.
+
+    In order to record anything a dector must be added. Therefore the
+    `add_detector` method must be called before the simulation can be
+    `run`.
+
+    Right now only one source and one detector can be used per simulation.
     """
-    def __init__(self, *, size, spacing, speed, duration, max_speed=None):
+    def __init__(self, *, size, spacing, speed, max_speed=None):
         """
         Parameters
         ----------
@@ -27,14 +34,17 @@ class Simulation:
         speed : float or array
             Speed of the wave in meters per second. If a float then
             speed is assumed constant across the whole grid. If an
-            array then must be the same shape as the grid.
+            array then must be the same shape as the grid. Note that
+            the speed is assumed contant in time.
         max_speed : float, optional
             Maximum speed of the wave in meters per second. If passed then
-            this speed will be used to derive timestep.
-        duration : float
-            Length of the simulation in seconds.
+            this speed will be used to derive the time step.
         """
+
+        # Create grid
         self._grid = Grid(size=size, spacing=spacing)
+
+        # Creat speed array
         self._speed = np.full(self._grid.shape, speed)
 
         # Calculate the theoretically optical courant number
@@ -45,19 +55,24 @@ class Simulation:
         # calculate the largest stable time step
         if max_speed is None:
             max_speed = np.max(self.speed)
-
         max_step = courant_number * self.grid.spacing / max_speed 
 
         # Round step, i.e. 5.047e-7 => 5e-7
         power =  np.power(10, np.floor(np.log10(max_step)))
         coef = int(np.floor(max_step / power))
         step = coef * power
-        self._time = Time(step=step, duration=duration)
 
-        self._wave = np.zeros((self.time.nsteps,) + self.grid.shape)
-        self._source_array = np.zeros((self.time.nsteps,) + self.grid.shape)
-        self._speed_array = np.zeros((self.time.nsteps,) + self.grid.shape)
+        # Set the time step informatioan for 
+        self._time_step = step
+
+        # Initialize some unset attributes
+        self._time = None
         self._source = None
+        self._detector = None
+        self._wave_current = None
+        self._wave_previous = None
+        self._wave_array = None
+        self._source_array = None
         self._run = False
 
     @property
@@ -66,13 +81,18 @@ class Simulation:
         return self._grid
 
     @property
+    def detector(self):
+        """Decector: detector that simulation is recorded over."""
+        return self._detector
+
+    @property
     def time(self):
         """Time: Time that simulation is defined over."""
         return self._time
     
     @property
     def speed(self):
-        """Array or float: Speed of the wave in meters per second."""
+        """Array: Speed of the wave in meters per second."""
         return self._speed
 
     @property
@@ -84,58 +104,100 @@ class Simulation:
             raise ValueError('Simulation must be run first, use Simulation.run()')
 
     @property
-    def full_speed(self):
-        """array: Array for the speed."""
-        if self._run:
-            return self._speed_array
-        else:
-            raise ValueError('Simulation must be run first, use Simulation.run()')
-
-    @property
     def wave(self):
         """array: Array for the wave."""
         if self._run:
-            return self._wave
+            return self._wave_array
         else:
             raise ValueError('Simulation must be run first, use Simulation.run()')
 
-    def run(self, *, progress=True, leave=False):
-        """Run the simulation.
-        
-        Note a source must be added before the simulation can be run.
+    def _setup_run(self, duration):
+        """Setup run of the simulation.
 
         Parameters
         ----------
+        duration : float
+            Length of the simulation in seconds.
+        """
+        # Create time object based on duration of run
+        self._time = Time(step=self._time_step, duration=duration)
+
+        self._wave_current = np.zeros(self.grid.shape)
+        self._wave_previous = np.zeros(self.grid.shape)
+
+        # Create detector arrays for wave and source
+        full_shape = (int((self.time.nsteps - 1) // self.detector.temporal_downsample + 1),) + self.detector.downsample_shape
+        self._wave_array = np.zeros(full_shape)
+        self._source_array = np.zeros(full_shape)
+
+    def run(self, duration, *, progress=True, leave=False):
+        """Run the simulation.
+        
+        Note a source and a detector must be added before the simulation
+        can be run.
+
+        Parameters
+        ----------
+        duration : float
+            Length of the simulation in seconds.
         progress : bool, optional
             Show progress bar or not.
         leave : bool, optional
             Leave progress bar or not.
         """
-        # Reset wave to 0
-        self._wave *= 0
+        # Setup the simulation for the requested duration
+        self._setup_run(duration=duration)
 
         if self._source is None:
-            raise ValueError('Please add a source before running, use Simulation.add_source()')
+            raise ValueError('Please add a source before running, use Simulation.add_source')
+
+        if self._detector is None:
+            raise ValueError('Please add a detector before running, use Simulation.add_detector')
 
         for current_step in tqdm(range(self.time.nsteps), disable=not progress, leave=leave):
-            # Take wave to be zero for first two time steps 
             current_time = self.time.step * current_step
 
-            # Save source values
-            self._speed_array[current_step] = self.speed
+            # Get current source values
+            source_current = self._source.value(current_time)
 
-            # Save source values
-            self._source_array[current_step] = self._source.value(current_time)
+            # Compute the next wave values
+            wave_tmp =  wave_equantion_update(U_1=self._wave_current, 
+                                              U_0=self._wave_previous,
+                                              c=self.speed,
+                                              Q_1=source_current,
+                                              dt=self.time.step,
+                                              dx=self.grid.spacing
+                                             )
 
-            # Save wave values
-            self._wave[current_step] = wave_equantion_update(U_1=self._wave[current_step - 1], 
-                                                                U_0=self._wave[current_step - 2],
-                                                                c=self.speed,
-                                                                Q_1=self._source_array[current_step],
-                                                                dt=self.time.step,
-                                                                dx=self.grid.spacing
-                                                                )
+            self._wave_previous = self._wave_current
+            self._wave_current = wave_tmp
+
+            # Record wave using detector
+            if current_step % self.detector.temporal_downsample == 0:
+                index = int(current_step // self.detector.temporal_downsample)
+                self._wave_array[index] = self._wave_current[self.detector.downsample_index]
+                self._source_array[index] = source_current[self.detector.downsample_index]
+
         self._run = True
+
+    def add_detector(self, *, spatial_downsample=1, temporal_downsample=1):
+        """Add a detector to the simulaiton.
+        
+        Note this must be done before the simulation can be run.
+
+        Parameters
+        ----------
+        spatial_downsample : int
+            Spatial downsample factor.
+        temporal_downsample : int
+            Temporal downsample factor.
+        """
+        self._run = False
+        self._detector = Detector(shape=self.grid.shape,
+                                  spacing=self.grid.spacing,
+                                  spatial_downsample=spatial_downsample,
+                                  temporal_downsample=temporal_downsample
+                                 )
 
     def add_source(self, *, location, period, ncycles=None, phase=0,):
         """Add a source to the simulaiton.

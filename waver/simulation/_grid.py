@@ -1,6 +1,7 @@
 from functools import lru_cache
 from typing import NamedTuple, Tuple
 
+
 class Grid(NamedTuple):
     """Grid that the simulation is defined on.
     
