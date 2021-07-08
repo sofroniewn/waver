@@ -21,7 +21,7 @@ class Simulation:
 
     Right now only one source and one detector can be used per simulation.
     """
-    def __init__(self, *, size, spacing, speed, max_speed=None):
+    def __init__(self, *, size, spacing, speed, max_speed=None, time_step=None):
         """
         Parameters
         ----------
@@ -39,6 +39,8 @@ class Simulation:
         max_speed : float, optional
             Maximum speed of the wave in meters per second. If passed then
             this speed will be used to derive the time step.
+        time_step : float, optional
+            Time step to use if stable.
         """
 
         # Create grid
@@ -62,7 +64,11 @@ class Simulation:
         coef = int(np.floor(max_step / power))
         step = coef * power
 
-        # Set the time step informatioan for 
+        # If time step is provided and it would be stable use it
+        if time_step is not None:
+            step = min(step, time_step)
+
+        # Set the time step informatioan for        
         self._time_step = step
 
         # Initialize some unset attributes
@@ -94,6 +100,11 @@ class Simulation:
     def speed(self):
         """Array: Speed of the wave in meters per second."""
         return self._speed
+
+    @property
+    def detector_speed(self):
+        """Array: Speed of the wave in meters per second on detector."""
+        return self._speed[self.detector.downsample_index]
 
     @property
     def source(self):
