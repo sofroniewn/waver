@@ -6,7 +6,7 @@
 [![tests](https://github.com/sofroniewn/waver/workflows/tests/badge.svg)](https://github.com/sofroniewn/waver/actions)
 [![codecov](https://codecov.io/gh/sofroniewn/waver/branch/master/graph/badge.svg)](https://codecov.io/gh/sofroniewn/waver)
 
-Wave simulations and inversions (Under Construction!)
+Wave simulations (Under Construction!!!!)
 
 ----------------------------------
 
