@@ -1,6 +1,6 @@
 from magicgui import magic_factory
 from napari_plugin_engine import napari_hook_implementation
-import numpy as np
+from .simulation import Simulation
 
 
 @magic_factory(call_button="run",
@@ -10,31 +10,34 @@ import numpy as np
 )
 def simulation(spacing: float=1e-3,
                speed: float=343, 
-               time_step: float=200e-9) -> 'napari.types.ImageData':
-    print(f"you have selected {spacing} {speed} {time_step}")
-    return np.random.random((50, 50))
+               time_step: float=200e-9) -> 'napari.types.LayerDataTuple':
+    """Run a single simulation.
+    """
+    # Should be provided by magicgui, right now hard coded
+    size = (12.8e-3, 12.8e-3) # how to do tuple - could be 1D, 2D, 3D?
+    spacing=1e-5
+    speed=343
+    time_step=200e-9
+    period=5e-6
+    duration=60e-6
+
+    # Create simulation
+    sim = Simulation(size=size, spacing=spacing, speed=speed, time_step=time_step)
+
+    # Add source
+    sim.add_source(location=(s/2 for s in size), period=period, ncycles=1)
+
+    # Add detector grid
+    sim.add_detector()
+
+    # Run simulation
+    sim.run(duration=duration)
+
+    # Return simulation wave data
+    layer_dict = {'colormap': 'PiYG', 'contrast_limits':[-1.5, 1.5], 'name': 'wave'}
+    return (sim.wave, layer_dict, 'Image')
 
 
 @napari_hook_implementation
 def napari_experimental_provide_dock_widget():
     return simulation
-
-
-
-#     # Create simulation, 12.8mm at 100um spacing, at 200ns resolution
-# sim_dict = {'size': (384e-4,),
-#             'spacing': 1e-4,
-#             'speed': 343,
-#             'time_step': 200e-9,
-#             }
-
-# sim = Simulation(**sim_dict)
-
-# # Add a point source in the center, 200kHz pulse for one cycle
-# sim.add_source(location=(0,), period=5e-6, ncycles=1)
-
-# # Add detector grid at full spatial and temporal resolution
-# sim.add_detector(spatial_downsample=3)
-
-# # Run simulation for 60.8us
-# sim.run(duration=120e-6)
