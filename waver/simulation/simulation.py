@@ -1,5 +1,6 @@
 import numpy as np
-from tqdm import tqdm
+# from tqdm import tqdm
+from napari.qt import progress as tqdm
 
 from ._detector import Detector
 from ._grid import Grid
