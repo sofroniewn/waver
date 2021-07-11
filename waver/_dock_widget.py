@@ -19,6 +19,7 @@ from .datasets import sample_speed
               method={'choices': ['flat', 'random', 'ifft', 'custom']},
               spatial_downsample={'min': 1, 'max':100, 'step': 1, 'label': 'spatial ds'},
               temporal_downsample={'min': 1, 'max':100, 'step': 1, 'label': 'temporal ds'},
+              boundary={'min': 0, 'max':100, 'step': 1},
 )
 def simulation(
                ndim: int=2,
@@ -33,6 +34,7 @@ def simulation(
                custom: 'napari.layers.Layer'=None,
                spatial_downsample: int=1,
                temporal_downsample: int=1,
+               boundary: int=0,
                ) -> 'napari.types.LayerDataTuple':
     """Run a single simulation.
     """
@@ -64,14 +66,14 @@ def simulation(
     sim.add_source(location=(s/2 for s in size), period=period, ncycles=1)
 
     # Add detector grid
-    sim.add_detector(spatial_downsample=spatial_downsample, temporal_downsample=temporal_downsample)
+    sim.add_detector(spatial_downsample=spatial_downsample, temporal_downsample=temporal_downsample, boundary=boundary)
 
     # Run simulation
     sim.run(duration=duration / 1e6)
 
     # Return simulation wave data
     clim = max(sim.wave.max(), abs(sim.wave.min())) / 3**ndim
-    wave_cmap = Colormap([[1, 0, 1, 1], [0, 0, 0, 0], [0, 1, 0, 1]], name='MBlG')
+    wave_cmap = Colormap([[0.55, 0, .32, 1], [0, 0, 0, 0], [0.15, 0.4, 0.1, 1]], name='MBlG')
     wave_dict = {'colormap': wave_cmap, 'contrast_limits':[-clim, clim], 'name': 'wave'}
     speed_cmap = Colormap([[0, 0, 0, 0], [0.7, 0.5, 0, 1]], name='Orange')
     speed_dict = {'colormap': speed_cmap, 'opacity': 0.5, 'contrast_limits':(min_speed, max_speed), 'name': 'speed'}
