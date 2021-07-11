@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def location_to_index(location, spacing, shape):
     """Convert a location to an index.
 
@@ -33,3 +36,36 @@ def location_to_index(location, spacing, shape):
     index = tuple(ind if ind is not None else slice(None) for ind in index)
 
     return index
+
+
+def sample_boundary(wave, boundary):
+    """Sample wave only at boundary.
+
+    Parameters
+    ----------
+    wave: array
+        Wave that should be sampled
+    boundary: int
+        Number of pixels at boundary that should be sampled. If zero
+        then full wave is returned
+
+    Returns
+    -------
+    array
+        Wave sampled at the boundary.
+    """
+    if boundary == 0:
+        return wave
+
+    wave_detected = []
+    # Move through boundaries and try and extract each "recorded" signal
+    for dim in range(wave.ndim):
+        index = [slice(None)] * wave.ndim
+        # Take lower and upper edges
+        for edge in [slice(0, boundary), slice(-boundary, wave.shape[dim])]:
+            index[dim] = edge
+            # Extract edge, move boundary axis to end and flatten
+            wave_at_boundary = np.moveaxis(wave[tuple(index)], dim, -1).flatten()
+            wave_detected.append(wave_at_boundary)
+
+    return np.concatenate(wave_detected)

@@ -11,7 +11,7 @@ sim = Simulation(size=(4e-3, 4e-3), spacing=1e-5, speed=speed)
 sim.add_source(location=(2e-3, 2e-3), period=1e-6, ncycles=1)
 
 # Add default detector
-sim.add_detector(spatial_downsample=4, temporal_downsample=5)
+sim.add_detector(spatial_downsample=4, temporal_downsample=5, boundary=4)
 
 # Run simulation
 sim.run(duration=1e-5)

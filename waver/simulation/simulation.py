@@ -6,6 +6,7 @@ from ._detector import Detector
 from ._grid import Grid
 from ._source import Source
 from ._time import Time
+from ._utils import sample_boundary
 from ._wave import wave_equantion_update
 
 
@@ -105,7 +106,7 @@ class Simulation:
     @property
     def detector_speed(self):
         """Array: Speed of the wave in meters per second on detector."""
-        return self._speed[self.detector.downsample_index]
+        return self._speed[self.detector.grid_index]
 
     @property
     def source(self):
@@ -187,28 +188,39 @@ class Simulation:
             # Record wave using detector
             if current_step % self.detector.temporal_downsample == 0:
                 index = int(current_step // self.detector.temporal_downsample)
-                self._wave_array[index] = self._wave_current[self.detector.downsample_index]
-                self._source_array[index] = source_current[self.detector.downsample_index]
+                wave_current_ds = self._wave_current[self.detector.grid_index]
+                source_current_ds = source_current[self.detector.grid_index]
+                if self.detector.boundary > 0:
+                    self._wave_array[index] = sample_boundary(wave_current_ds, self.detector.boundary)
+                    self._source_array[index] = sample_boundary(source_current_ds, self.detector.boundary)
+                else:
+                    self._wave_array[index] = wave_current_ds
+                    self._source_array[index] = source_current_ds
 
         self._run = True
 
-    def add_detector(self, *, spatial_downsample=1, temporal_downsample=1):
+    def add_detector(self, *, spatial_downsample=1, temporal_downsample=1, boundary=0):
         """Add a detector to the simulaiton.
         
         Note this must be done before the simulation can be run.
 
         Parameters
         ----------
-        spatial_downsample : int
+        spatial_downsample : int, optional
             Spatial downsample factor.
-        temporal_downsample : int
+        temporal_downsample : int, optional
             Temporal downsample factor.
+        boundary : int, optional
+            If greater than zero, then number of pixels on the boundary
+            to detect at, in downsampled coordinates. If zero then detection
+            is done over the full grid.
         """
         self._run = False
         self._detector = Detector(shape=self.grid.shape,
                                   spacing=self.grid.spacing,
                                   spatial_downsample=spatial_downsample,
-                                  temporal_downsample=temporal_downsample
+                                  temporal_downsample=temporal_downsample,
+                                  boundary=boundary,
                                  )
 
     def add_source(self, *, location, period, ncycles=None, phase=0,):
