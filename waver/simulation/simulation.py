@@ -68,7 +68,10 @@ class Simulation:
 
         # If time step is provided and it would be stable use it
         if time_step is not None:
-            step = min(step, time_step)
+            if step >= time_step:
+                step = time_step
+            else:
+                raise ValueError(f'Provided time step {time_step} is larger than minimum required time step of {step}')
 
         # Set the time step informatioan for        
         self._time_step = step

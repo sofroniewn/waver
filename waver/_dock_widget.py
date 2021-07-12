@@ -27,7 +27,7 @@ def simulation(
                spacing: float=100,
                min_speed: float=343, 
                max_speed: float=686, 
-               time_step: float=200,
+               time_step: float=50,
                duration: float=60,
                frequency: float=500,
                method: str='flat',
@@ -73,7 +73,7 @@ def simulation(
 
     # Return simulation wave data
     clim = max(sim.wave.max(), abs(sim.wave.min())) / 3**ndim
-    wave_cmap = Colormap([[0.55, 0, .32, 1], [0, 0, 0, 0], [0.15, 0.4, 0.1, 1]], name='MBlG')
+    wave_cmap = Colormap([[0.55, 0, .32, 1], [0, 0, 0, 0], [0.15, 0.4, 0.1, 1]], name='PBlG')
     wave_dict = {'colormap': wave_cmap, 'contrast_limits':[-clim, clim], 'name': 'wave'}
     speed_cmap = Colormap([[0, 0, 0, 0], [0.7, 0.5, 0, 1]], name='Orange')
     speed_dict = {'colormap': speed_cmap, 'opacity': 0.5, 'contrast_limits':(min_speed, max_speed), 'name': 'speed'}
