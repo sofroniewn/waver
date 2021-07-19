@@ -11,7 +11,7 @@ spacing = 1e-4
 time_step = 50e-9
 min_speed = 343
 max_speed = 686
-duration = 6.08e-5
+duration = 30e-6
 
 # Define a speed sampling method
 speed = 'random' # 'ifft'
@@ -36,6 +36,7 @@ dataset = generate_simulation_dataset(
                                        time_step=time_step,
                                        speed=speed,
                                        sources=sources,
+                                       temporal_downsample=2,
                                      )
 
 print(dataset)

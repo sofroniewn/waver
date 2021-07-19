@@ -50,9 +50,9 @@ def generate_simulation_dataset(path, runs, **kawrgs):
     for run in tqdm(range(runs), leave=False):
         wave, speed = run_multiple_sources(**kawrgs)
         if speed_array is None:
-            speed_array = dataset.zeros('speed', shape=(runs, ) + speed.shape, chunks=(1,) + (None,) * speed.ndim)
+            speed_array = dataset.zeros('speed', shape=(runs, ) + speed.shape, chunks=(1,) + (64,) * speed.ndim)
         if wave_array is None:
-            wave_array = dataset.zeros('wave', shape=(runs, ) + wave.shape, chunks=(1,) + (None,) * wave.ndim)
+            wave_array = dataset.zeros('wave', shape=(runs, ) + wave.shape, chunks=(1,) + (64,) * wave.ndim)
 
         speed_array[run] = speed
         wave_array[run] = wave
