@@ -1,3 +1,7 @@
+import numpy as np
+from scipy.fft import ifft
+
+
 def location_to_index(location, spacing, shape):
     """Convert a location to an index.
 
@@ -33,3 +37,82 @@ def location_to_index(location, spacing, shape):
     index = tuple(ind if ind is not None else slice(None) for ind in index)
 
     return index
+
+
+def sample_boundary(wave, boundary):
+    """Sample wave only at boundary.
+
+    Parameters
+    ----------
+    wave: array
+        Wave that should be sampled
+    boundary: int
+        Number of pixels at boundary that should be sampled. If zero
+        then full wave is returned
+
+    Returns
+    -------
+    array
+        Wave sampled at the boundary.
+    """
+    if boundary == 0:
+        return wave
+
+    wave_detected = []
+    # Move through boundaries and try and extract each "recorded" signal
+    for dim in range(wave.ndim):
+        index = [slice(None)] * wave.ndim
+        # Take lower and upper edges
+        for edge in [slice(0, boundary), slice(-boundary, wave.shape[dim])]:
+            index[dim] = edge
+            # Extract edge, move boundary axis to end and flatten
+            wave_at_boundary = np.moveaxis(wave[tuple(index)], dim, -1).flatten()
+            wave_detected.append(wave_at_boundary)
+
+    return np.concatenate(wave_detected)
+
+
+def generate_speed_array(method, grid, speed_range):
+    """Generate a speed distribution according to sampling method.
+
+    Parameters
+    ----------
+    method : str
+        Method for generating the speed distribution.
+    grid : waver.components.Grid
+        Grid that the speed distribution should be defined on.
+    speed_range : tuple of float
+        Minimum and maximum allowed speeds.
+
+    Returns
+    -------
+    speed : np.ndarray
+        Speed values matched to the shape of the grid, and in the
+        allowed range, sampled according to input method.
+    """
+    shape = grid.shape
+    if method == 'flat':
+        speed = speed_range[0] * np.ones(shape)
+    elif method == 'random':
+        speed = speed_range[0] + np.random.random(shape) * (speed_range[1] - speed_range[0])
+    elif method == 'ifft' and len(shape) == 1:
+        shape = shape[0]
+        freq_cutoff = np.random.randint(shape)
+        weights = np.random.random((freq_cutoff,))
+        weights = weights / np.sum(weights)
+        values = np.zeros((shape,))
+        values[:freq_cutoff] = shape * weights
+
+        shift = np.random.randint(shape)
+        output = np.roll(ifft(values), shift)
+        output = np.clip(np.abs(output), 0, 1)
+        speed = speed_range[0] + output * (speed_range[1] - speed_range[0])
+    elif method == 'mixed_random_ifft':
+        if np.random.rand() > 0.5:
+            speed = generate_speed_array('random', grid, speed_range)
+        else:
+            speed = generate_speed_array('ifft', grid, speed_range)
+    else:
+        raise ValueError(f'Speed sampling method {method} not recognized for this grid shape')
+
+    return speed

@@ -9,14 +9,13 @@ duration = 6.08e-5
 
 # Define a speed range, min speed of sound in air
 speed_range = (343, 686)
-speed=speed_range[0]
-
 speed = np.random.random((128, 128)) * 343 + 343
 
 # Define sources, a single 40KHz pulse at the left and right edges
 sources = {'location':(None, 0), 'period':5e-6, 'ncycles':1}
 
-sim = Simulation(size=size, spacing=spacing, speed=speed, max_speed=speed_range[1])
+sim = Simulation(size=size, spacing=spacing, max_speed=speed_range[1])
+sim.set_speed(speed=speed)
 
 # Add a point source in the center, 1MHz pulse for 1us
 sim.add_source(**sources)

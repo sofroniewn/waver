@@ -9,7 +9,7 @@ from waver.simulation import Simulation
 # Create simulation, 12.8mm at 100um spacing, at 200ns resolution
 sim_dict = {'size': (384e-4,),
             'spacing': 1e-4,
-            'speed': 343,
+            'max_speed': 343,
             'time_step': 200e-9,
             }
 
@@ -19,7 +19,7 @@ sim = Simulation(**sim_dict)
 sim.add_source(location=(0,), period=5e-6, ncycles=1)
 
 # Add detector grid at full spatial and temporal resolution
-sim.add_detector(spatial_downsample=3)
+sim.add_detector(spatial_downsample=3, boundary=20)
 
 # Run simulation for 60.8us
 sim.run(duration=120e-6)
