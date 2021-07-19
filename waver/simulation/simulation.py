@@ -82,8 +82,6 @@ class Simulation:
         self._wave_current = None
         self._wave_previous = None
         self._wave_array = None
-        self._speed_array = None
-        self._wave_array = None
         self._run = False
 
     @property

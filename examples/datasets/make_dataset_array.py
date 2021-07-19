@@ -2,26 +2,34 @@ from numpy.lib.utils import source
 from waver.datasets import generate_simulation_dataset
 
 # Define root path for simulation
-path = '/Users/nsofroniew/Documents/inverting_physics/2D_simulations/test.zarr'
-runs = 3
+path = '/Users/nsofroniew/Documents/inverting_physics/2D_simulations/test_astro.zarr'
 
 # Define a simulation, 12.8mm, 100um spacing, for 60.8us (leads to 100ns timesteps)
-size = (12.8e-3, 12.8e-3)
+size = (12.8e-3,)
 spacing = 1e-4
 time_step = 50e-9
 min_speed = 343
 max_speed = 686
-duration = 30e-6
+duration = 60e-6
 
-# Define a speed sampling method
-speed = 'random' # 'ifft'
+# Define a custom speed based on an image
+from skimage import data
+import scipy.ndimage as ndi
+
+full_image = data.astronaut().mean(axis=2)
+# full_image = data.camera()
+full_image = full_image / full_image.max()
+rescaled_image = ndi.zoom(full_image, 128/full_image.shape[0])
+normed_image = min_speed + (max_speed - min_speed) * rescaled_image
+
+# Set normed_image to be runs
+runs = normed_image
+
+
 
 # Define sources, a single 40KHz pulse at the left and right edges
 sources = [
-    {'location':(0, None), 'period':5e-6, 'ncycles':1},
-    {'location':(size[0], None), 'period':5e-6, 'ncycles':1},
-    {'location':(None, 0), 'period':5e-5, 'ncycles':1},
-    {'location':(None, size[0]), 'period':5e-6, 'ncycles':1},
+    {'location':(0,), 'period':5e-6, 'ncycles':1},
 ]
 
 # Generate simulation dataset according to the above configuration
@@ -34,20 +42,9 @@ dataset = generate_simulation_dataset(
                                        min_speed=min_speed,
                                        max_speed=max_speed,
                                        time_step=time_step,
-                                       speed=speed,
                                        sources=sources,
                                        temporal_downsample=2,
+                                       boundary=1,
                                      )
 
 print(dataset)
-
-########### Other Sources
-# # Define sources, a 2MHz, 5MHz, and 100KHz pulse at the left and right edges
-# sources = [
-#     {'location':(0,) * len(size), 'period':2e-6, 'ncycles':1},
-#     {'location':(0,) * len(size), 'period':5e-6, 'ncycles':1},
-#     {'location':(0,) * len(size), 'period':1e-5, 'ncycles':1},
-#     {'location': size, 'period':2e-6, 'ncycles':1},
-#     {'location': size, 'period':5e-6, 'ncycles':1},
-#     {'location': size, 'period':1e-5, 'ncycles':1},
-# ]

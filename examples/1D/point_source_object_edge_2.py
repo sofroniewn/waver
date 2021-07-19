@@ -8,7 +8,9 @@ speed[100:150] = 2*343
 speed[200:220] = 0.5*343
 speed[250:280] = 1.5*343
 # Create simulation, 10cm, 100um spacing
-sim = Simulation(size=(5e-2,), spacing=1e-4, speed=speed, max_speed=686)
+sim = Simulation(size=(5e-2,), spacing=1e-4, max_speed=686)
+sim.set_speed(speed=speed)
+
 # Add a point source in at the left edge, 1MHz pulse for 1us
 sim.add_source(location=(0,), period=1e-5, ncycles=1)
 # Add default detector

@@ -13,8 +13,10 @@ def generate_simulation_dataset(path, runs, **kawrgs):
     ----------
     path : str
         Root path where simulation data will be stored.
-    runs : int
-        Number of runs to use.
+    runs : int, array
+        If int then number of runs to use. If array then
+        array must be of one dim more than simulation grid
+        dim.
     kawrgs :
         run_simulation kwargs.
 
@@ -28,6 +30,12 @@ def generate_simulation_dataset(path, runs, **kawrgs):
 
     # Create dataset
     dataset = zarr.open(path.as_posix(), mode='w')
+
+    if not isinstance(runs, int):
+        full_speed_array = runs
+        runs = len(runs)
+    else:
+        full_speed_array = None        
 
     # Add dataset attributes
     dataset.attrs['waver'] = True
@@ -48,6 +56,8 @@ def generate_simulation_dataset(path, runs, **kawrgs):
     
     # Move through runs
     for run in tqdm(range(runs), leave=False):
+        if full_speed_array is not None:
+            kawrgs['speed'] = full_speed_array[run]
         wave, speed = run_multiple_sources(**kawrgs)
         if speed_array is None:
             speed_array = dataset.zeros('speed', shape=(runs, ) + speed.shape, chunks=(1,) + (64,) * speed.ndim)

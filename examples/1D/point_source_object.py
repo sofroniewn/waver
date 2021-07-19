@@ -6,7 +6,9 @@ from waver.simulation import Simulation
 speed = 343 * np.ones((399,))
 speed[100:150] = 2*343
 # Create simulation, 4mm x 4mm, 10um spacing
-sim = Simulation(size=(4e-3,), spacing=1e-5, speed=speed)
+sim = Simulation(size=(4e-3,), spacing=1e-5, max_speed=speed.max())
+sim.set_speed(speed=speed)
+
 # Add a point source in the center, 1MHz pulse for 1us
 sim.add_source(location=(2e-3,), period=1e-6, ncycles=1)
 # Add default detector
@@ -30,7 +32,7 @@ viewer = napari.Viewer()
 # Add simulated wave, speed and source
 viewer.add_image(np.expand_dims(-sim.wave[:, 0], axis=0), colormap='PiYG', opacity=0.9, contrast_limits=(-1.5, 1.5))
 viewer.add_image(np.expand_dims(-sim.wave[:, -1], axis=0), colormap='PiYG', opacity=0.9, contrast_limits=(-1.5, 1.5))
-viewer.dims.ndisplay = 1
+# viewer.dims.ndisplay = 1
 # Add simulation to the console
 viewer.update_console({'sim': sim})
 

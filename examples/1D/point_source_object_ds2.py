@@ -9,7 +9,7 @@ from waver.simulation import Simulation
 # Create simulation, 12.8mm at 100um spacing, at 200ns resolution
 sim_dict = {'size': (384e-4,),
             'spacing': 1e-4,
-            'speed': 343,
+            'max_speed': 343,
             'time_step': 200e-9,
             }
 

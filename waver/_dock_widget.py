@@ -3,8 +3,6 @@ from napari_plugin_engine import napari_hook_implementation
 from napari.utils import Colormap
 from .simulation import run_single_source
 
-# ToDo
-# Let custom "images" be taken as speed arrays .... ?????
 
 @magic_factory(call_button="run",
               ndim={'min': 1, 'max':3, 'step': 1},

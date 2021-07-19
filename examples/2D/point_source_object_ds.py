@@ -6,7 +6,9 @@ from waver.simulation import Simulation
 speed = 343 * np.ones((399, 399))
 speed[100:150, 220:270] = 2*343
 # Create simulation, 4mm x 4mm, 10um spacing, for 10us
-sim = Simulation(size=(4e-3, 4e-3), spacing=1e-5, speed=speed)
+sim = Simulation(size=(4e-3, 4e-3), spacing=1e-5, max_speed=speed.max())
+sim.set_speed(speed=speed)
+
 # Add a point source in the center, 1MHz pulse for 1us
 sim.add_source(location=(2e-3, 2e-3), period=1e-6, ncycles=1)
 
