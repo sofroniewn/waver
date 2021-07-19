@@ -107,6 +107,11 @@ def generate_speed_array(method, grid, speed_range):
         output = np.roll(ifft(values), shift)
         output = np.clip(np.abs(output), 0, 1)
         speed = speed_range[0] + output * (speed_range[1] - speed_range[0])
+    elif method == 'mixed_random_ifft':
+        if np.random.rand() > 0.5:
+            speed = generate_speed_array('random', grid, speed_range)
+        else:
+            speed = generate_speed_array('ifft', grid, speed_range)
     else:
         raise ValueError(f'Speed sampling method {method} not recognized for this grid shape')
 
