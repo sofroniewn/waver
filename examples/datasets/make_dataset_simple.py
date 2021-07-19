@@ -1,21 +1,17 @@
-from waver.datasets import generate_simulation_datasets
+from numpy.lib.utils import source
+from waver.datasets import generate_simulation_dataset
 
 # Define root path for simulation
-path = '/Users/nsofroniew/Documents/inverting_physics/2D_simulations/12_8mm_at_100um/200kHz_f'
-
-reduced = False
-
-# Consider train and test splits
-splits = ['train']
-runs = [1]
+path = '/Users/nsofroniew/Documents/inverting_physics/2D_simulations/test'
+runs = 3
 
 # Define a simulation, 12.8mm, 100um spacing, for 60.8us (leads to 100ns timesteps)
 size = (12.8e-3, 12.8e-3)
 spacing = 1e-4
+time_step = 50e-9
+min_speed = 343
+max_speed = 686
 duration = 6.08e-5
-
-# Define a speed range, min speed of sound in air
-speed_range = (343, 686)
 
 # Define a speed sampling method
 speed = 'random' # 'ifft'
@@ -29,17 +25,17 @@ sources = [
 ]
 
 # Generate simulation dataset according to the above configuration
-dataset = generate_simulation_datasets(
+dataset = generate_simulation_dataset(
                                        path=path,
+                                       runs=runs,
                                        size=size,
                                        spacing=spacing,
                                        duration=duration,
-                                       speed_range=speed_range,
+                                       min_speed=min_speed,
+                                       max_speed=max_speed,
+                                       time_step=time_step,
                                        speed=speed,
                                        sources=sources,
-                                       splits=splits,
-                                       runs=runs,
-                                       reduced=reduced
                                      )
 
 print(dataset)
