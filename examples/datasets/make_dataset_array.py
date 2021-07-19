@@ -25,8 +25,6 @@ normed_image = min_speed + (max_speed - min_speed) * rescaled_image
 # Set normed_image to be runs
 runs = normed_image
 
-
-
 # Define sources, a single 40KHz pulse at the left and right edges
 sources = [
     {'location':(0,), 'period':5e-6, 'ncycles':1},

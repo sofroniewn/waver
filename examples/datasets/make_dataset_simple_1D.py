@@ -2,7 +2,7 @@ from numpy.lib.utils import source
 from waver.datasets import generate_simulation_dataset
 
 # Define root path for simulation
-path = '/Users/nsofroniew/Documents/inverting_physics/1D_simulations/12_8mm_at_100um.zarr'
+path = '/Users/nsofroniew/Documents/inverting_physics/1D_simulations/12_8mm_at_100um/mixed_random_ifft.zarr'
 runs = 1000
 
 # Define a simulation, 12.8mm, 100um spacing, for 60.8us
