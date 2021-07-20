@@ -19,7 +19,7 @@ sim = Simulation(**sim_dict)
 sim.add_source(location=(0,), period=5e-6, ncycles=1)
 
 # Add detector grid at full spatial and temporal resolution
-sim.add_detector(spatial_downsample=3, boundary=20)
+sim.add_detector(spatial_downsample=3, boundary=20, edge=0)
 
 # Run simulation for 60.8us
 sim.run(duration=120e-6)

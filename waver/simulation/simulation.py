@@ -217,15 +217,15 @@ class Simulation:
                 wave_current_ds = self._wave_current[self.detector.grid_index]
                 source_current_ds = source_current[self.detector.grid_index]
                 if self.detector.boundary > 0:
-                    self._wave_array[index] = sample_boundary(wave_current_ds, self.detector.boundary)
-                    self._source_array[index] = sample_boundary(source_current_ds, self.detector.boundary)
+                    self._wave_array[index] = sample_boundary(wave_current_ds, self.detector.boundary, self.detector.edge)
+                    self._source_array[index] = sample_boundary(source_current_ds, self.detector.boundary, self.detector.edge)
                 else:
                     self._wave_array[index] = wave_current_ds
                     self._source_array[index] = source_current_ds
 
         self._run = True
 
-    def add_detector(self, *, spatial_downsample=1, temporal_downsample=1, boundary=0):
+    def add_detector(self, *, spatial_downsample=1, temporal_downsample=1, boundary=0, edge=None):
         """Add a detector to the simulaiton.
         
         Note this must be done before the simulation can be run.
@@ -240,6 +240,11 @@ class Simulation:
             If greater than zero, then number of pixels on the boundary
             to detect at, in downsampled coordinates. If zero then detection
             is done over the full grid.
+        edge : int, optional
+            If provided detect only at that particular "edge", which in 1D is
+            a point, 2D a line, 3D a plane etc. The particular edge is determined
+            by indexing around the grid. It None is provided then all edges are
+            used.  
         """
         self._run = False
         self._detector = Detector(shape=self.grid.shape,
@@ -247,6 +252,7 @@ class Simulation:
                                   spatial_downsample=spatial_downsample,
                                   temporal_downsample=temporal_downsample,
                                   boundary=boundary,
+                                  edge=edge,
                                  )
 
     def add_source(self, *, location, period, ncycles=None, phase=0):
@@ -300,7 +306,7 @@ class Simulation:
 
 def run_single_source(size, spacing, location, period, duration, max_speed, time_step=None,
                    speed=None, min_speed=0, spatial_downsample=1, temporal_downsample=1,
-                   boundary=0, ncycles=1, phase=0, progress=True, leave=False):
+                   boundary=0, edge=None, ncycles=1, phase=0, progress=True, leave=False):
     """Convenience method to run a single simulation with a single source.
 
     Parameters
@@ -343,6 +349,11 @@ def run_single_source(size, spacing, location, period, duration, max_speed, time
         If greater than zero, then number of pixels on the boundary
         to detect at, in downsampled coordinates. If zero then detection
         is done over the full grid.
+    edge : int, optional
+        If provided detect only at that particular "edge", which in 1D is
+        a point, 2D a line, 3D a plane etc. The particular edge is determined
+        by indexing around the grid. It None is provided then all edges are
+        used.  
     ncycles : int or None
         If None, source is considered to be continous, otherwise
         it will only run for ncycles.
@@ -376,7 +387,8 @@ def run_single_source(size, spacing, location, period, duration, max_speed, time
     sim.add_source(location=location, period=period, ncycles=ncycles, phase=phase)
 
     # Add detector grid
-    sim.add_detector(spatial_downsample=spatial_downsample, temporal_downsample=temporal_downsample, boundary=boundary)
+    sim.add_detector(spatial_downsample=spatial_downsample, temporal_downsample=temporal_downsample,
+                     boundary=boundary, edge=edge)
 
     # Run simulation
     sim.run(duration=duration, progress=progress, leave=leave)
@@ -387,7 +399,7 @@ def run_single_source(size, spacing, location, period, duration, max_speed, time
 
 def run_multiple_sources(size, spacing, sources, duration, max_speed, time_step=None,
                    speed=None, min_speed=0, spatial_downsample=1, temporal_downsample=1,
-                   boundary=0, progress=True, leave=False):
+                   boundary=0, edge=None, progress=True, leave=False):
     """Convenience method to run a single simulation with a single source.
 
     Parameters
@@ -424,6 +436,11 @@ def run_multiple_sources(size, spacing, sources, duration, max_speed, time_step=
         If greater than zero, then number of pixels on the boundary
         to detect at, in downsampled coordinates. If zero then detection
         is done over the full grid.
+    edge : int, optional
+        If provided detect only at that particular "edge", which in 1D is
+        a point, 2D a line, 3D a plane etc. The particular edge is determined
+        by indexing around the grid. It None is provided then all edges are
+        used.  
     progress : bool, optional
         Show progress bar or not.
     leave : bool, optional
@@ -451,7 +468,7 @@ def run_multiple_sources(size, spacing, sources, duration, max_speed, time_step=
         wave, detected_speed = run_single_source(size=size, spacing=spacing, **source,
                 duration=duration, max_speed=max_speed, time_step=time_step, speed=speed, min_speed=min_speed,
                 spatial_downsample=spatial_downsample, temporal_downsample=temporal_downsample,
-                boundary=boundary, progress=progress, leave=leave)
+                boundary=boundary, edge=edge, progress=progress, leave=leave)
         detected_waves.append(wave)
 
     # Return simulation wave and speed data

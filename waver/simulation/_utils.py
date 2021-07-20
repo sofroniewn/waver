@@ -39,16 +39,21 @@ def location_to_index(location, spacing, shape):
     return index
 
 
-def sample_boundary(wave, boundary):
+def sample_boundary(wave, boundary, edge=None):
     """Sample wave only at boundary.
 
     Parameters
     ----------
-    wave: array
+    wave : array
         Wave that should be sampled
-    boundary: int
+    boundary : int
         Number of pixels at boundary that should be sampled. If zero
         then full wave is returned
+    edge : int, optional
+        If provided detect only at that particular "edge", which in 1D is
+        a point, 2D a line, 3D a plane etc. The particular edge is determined
+        by indexing around the grid. It None is provided then all edges are
+        used.        
 
     Returns
     -------
@@ -58,18 +63,29 @@ def sample_boundary(wave, boundary):
     if boundary == 0:
         return wave
 
-    wave_detected = []
-    # Move through boundaries and try and extract each "recorded" signal
-    for dim in range(wave.ndim):
+    if edge is None:
+        wave_detected = []
+        # Move through boundaries and try and extract each "recorded" signal
+        for dim in range(wave.ndim):
+            index = [slice(None)] * wave.ndim
+            # Take lower and upper edges
+            for edge_slice in [slice(0, boundary), slice(-boundary, wave.shape[dim])]:
+                index[dim] = edge_slice
+                # Extract edge, move boundary axis to end and flatten
+                wave_at_boundary = np.moveaxis(wave[tuple(index)], dim, -1).flatten()
+                wave_detected.append(wave_at_boundary)
+        return np.concatenate(wave_detected)
+    else:
         index = [slice(None)] * wave.ndim
-        # Take lower and upper edges
-        for edge in [slice(0, boundary), slice(-boundary, wave.shape[dim])]:
-            index[dim] = edge
-            # Extract edge, move boundary axis to end and flatten
-            wave_at_boundary = np.moveaxis(wave[tuple(index)], dim, -1).flatten()
-            wave_detected.append(wave_at_boundary)
-
-    return np.concatenate(wave_detected)
+        dim = edge % wave.ndim
+        if edge >= wave.ndim:
+            edge_slice = slice(-boundary, wave.shape[dim])
+        else:
+            edge_slice = slice(0, boundary)
+        index[dim] = edge_slice
+        # Extract edge, move boundary axis to end and flatten
+        wave_at_boundary = np.moveaxis(wave[tuple(index)], dim, -1).flatten()
+        return wave_at_boundary
 
 
 def generate_speed_array(method, grid, speed_range):

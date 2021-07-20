@@ -2,8 +2,8 @@ from numpy.lib.utils import source
 from waver.datasets import generate_simulation_dataset
 
 # Define root path for simulation
-path = '/Users/nsofroniew/Documents/inverting_physics/1D_simulations/12_8mm_at_100um/mixed_random_ifft/test.zarr'
-runs = 300
+path = '/Users/nsofroniew/Documents/inverting_physics/1D_simulations/12_8mm_at_100um_1s/mixed_random_ifft/train.zarr'
+runs = 1000
 
 # Define a simulation, 12.8mm, 100um spacing, for 60.8us
 size = (12.8e-3,)
@@ -17,10 +17,9 @@ duration = 60.8e-6
 # Define a speed sampling method
 speed = 'mixed_random_ifft' # 'ifft'
 
-# Define sources, a single 200KHz pulse at the left and right edges
+# Define sources, a single 200KHz pulse at the left edge
 sources = [
     {'location':(0,), 'period':5e-6, 'ncycles':1},
-    {'location':(size[0],), 'period':5e-6, 'ncycles':1},
 ]
 
 # Generate simulation dataset according to the above configuration
@@ -36,7 +35,8 @@ dataset = generate_simulation_dataset(
                                        speed=speed,
                                        sources=sources,
                                        temporal_downsample=temporal_downsample,
-                                       boundary=1
+                                       boundary=1,
+                                       edge=0,
                                      )
 
 print(dataset)

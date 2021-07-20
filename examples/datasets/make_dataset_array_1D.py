@@ -2,15 +2,16 @@ from numpy.lib.utils import source
 from waver.datasets import generate_simulation_dataset
 
 # Define root path for simulation
-path = '/Users/nsofroniew/Documents/inverting_physics/2D_simulations/test_astro.zarr'
+path = '/Users/nsofroniew/Documents/inverting_physics/1D_simulations/12_8mm_at_100um/mixed_random_ifft/points.zarr'
 
-# Define a simulation, 12.8mm, 100um spacing, for 60.8us (leads to 100ns timesteps)
+# Define a simulation, 12.8mm, 100um spacing, for 60.8us
 size = (12.8e-3,)
 spacing = 1e-4
 time_step = 50e-9
+temporal_downsample = 2
 min_speed = 343
 max_speed = 686
-duration = 60e-6
+duration = 60.8e-6
 
 # Define a custom speed based on an image
 from skimage import data
@@ -20,14 +21,18 @@ full_image = data.astronaut().mean(axis=2)
 # full_image = data.camera()
 full_image = full_image / full_image.max()
 rescaled_image = ndi.zoom(full_image, 128/full_image.shape[0])
-normed_image = min_speed + (max_speed - min_speed) * rescaled_image
+
+import numpy as np
+rescaled_image = np.eye(128, 128)
 
 # Set normed_image to be runs
+normed_image = min_speed + (max_speed - min_speed) * rescaled_image
 runs = normed_image
 
-# Define sources, a single 40KHz pulse at the left and right edges
+# Define sources, a single 200KHz pulse at the left and right edges
 sources = [
     {'location':(0,), 'period':5e-6, 'ncycles':1},
+    {'location':(size[0],), 'period':5e-6, 'ncycles':1},
 ]
 
 # Generate simulation dataset according to the above configuration
