@@ -29,7 +29,7 @@ params = [
         'boundary': 10,
         'edge': None,
     }, {
-        'downsample_shape': (2*10,),
+        'downsample_shape': (2 * 10,),
     }),
     # 1D single edge
     ({
@@ -56,7 +56,7 @@ params = [
         'boundary': 1,
         'edge': None,
     }, {
-        'downsample_shape': (4 * 128,),
+        'downsample_shape': (4, 128),
     }),
     # 2D thick boundary
     ({
@@ -65,7 +65,7 @@ params = [
         'boundary': 10,
         'edge': None,
     }, {
-        'downsample_shape': (4 * 10 * 128,),
+        'downsample_shape': (4 * 10, 128),
     }),
     # 2D single edge
     ({
@@ -74,7 +74,7 @@ params = [
         'boundary': 1,
         'edge': 1,
     }, {
-        'downsample_shape': (128,),
+        'downsample_shape': (1, 128),
     }),
     # 3D full grid
     ({
@@ -92,7 +92,7 @@ params = [
         'boundary': 1,
         'edge': None,
     }, {
-        'downsample_shape': (6 * 128 * 128,),
+        'downsample_shape': (6, 128, 128),
     }),
     # 3D thick boundary
     ({
@@ -101,7 +101,7 @@ params = [
         'boundary': 10,
         'edge': None,
     }, {
-        'downsample_shape': (6 * 10 * 128 * 128,),
+        'downsample_shape': (6 * 10, 128, 128),
     }),
     # 3D single edge
     ({
@@ -110,7 +110,7 @@ params = [
         'boundary': 1,
         'edge': 1,
     }, {
-        'downsample_shape': (128 * 128,),
+        'downsample_shape': (1, 128, 128),
     }),
 ]
 
@@ -121,9 +121,13 @@ def test_detector(detector_params, expected_params):
     detector = Detector(**detector_params)
 
     assert detector.shape == detector_params['shape']
+    assert len(detector.downsample_shape) == len(detector.shape)
     assert detector.downsample_shape == expected_params['downsample_shape']
 
     # Record wave
     wave = np.zeros(detector_params['shape'])
     detected_wave = detector.sample(wave)
     assert detected_wave.shape == expected_params['downsample_shape']
+
+    # Note that sampling never changes the dimensionality of the wave
+    assert wave.ndim == detected_wave.ndim

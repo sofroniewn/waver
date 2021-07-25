@@ -2,22 +2,20 @@ import numpy as np
 from waver.datasets import run_and_visualize
 
 # Define a simulation, 12.8mm, 100um spacing
-speed = 343 * np.ones((128,))
-speed[70:80] = 2*343
 sim_params = {
-    'size': (12.8e-3,),
+    'size': (12.8e-3, 12.8e-3),
     'spacing': 100e-6,
     'duration': 80e-6,
     'min_speed': 343,
     'max_speed': 686,
-    'speed': speed,
+    'speed': 686,
     'time_step': 50e-9,
     'temporal_downsample': 2,
     'sources': [{
-        'location': (0,),
+        'location': (6.4e-3, 6.4e-3),
         'period': 5e-6,
         'ncycles':1,
-    }],
+    }]
 }
 
 # Run and visualize simulation

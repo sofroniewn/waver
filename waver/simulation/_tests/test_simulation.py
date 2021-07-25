@@ -34,7 +34,7 @@ simulation_variable_params = [
         'edge': None,
     }, {
         'grid_shape': (128,),
-        'detected_wave_shape': (200, 2 * 1),
+        'detected_wave_shape': (200, 2),
     }),
     # 1D full grid, half time, thick boundary
     ({
@@ -89,7 +89,7 @@ simulation_variable_params = [
         'edge': None,
     }, {
         'grid_shape': (128, 128),
-        'detected_wave_shape': (200, 4 * 1 * 128),
+        'detected_wave_shape': (200, 4, 128),
     }),
     # 2D full grid, half time, thick boundary
     ({
@@ -100,7 +100,7 @@ simulation_variable_params = [
         'edge': None,
     }, {
         'grid_shape': (128, 128),
-        'detected_wave_shape': (200, 4 * 5 * 128),
+        'detected_wave_shape': (200, 4 * 5, 128),
     }),
     # 2D full grid, half time, one boundary edge
     ({
@@ -111,7 +111,7 @@ simulation_variable_params = [
         'edge': 0,
     }, {
         'grid_shape': (128, 128),
-        'detected_wave_shape': (200, 128),
+        'detected_wave_shape': (200, 1, 128),
     }),
    # 3D full grid, full time
     ({
@@ -144,7 +144,7 @@ simulation_variable_params = [
         'edge': None,
     }, {
         'grid_shape': (32, 32, 32),
-        'detected_wave_shape': (200, 6 * 1 * 32 * 32),
+        'detected_wave_shape': (200, 6, 32, 32),
     }),
     # 3D full grid, half time, thick boundary
     ({
@@ -155,7 +155,7 @@ simulation_variable_params = [
         'edge': None,
     }, {
         'grid_shape': (32, 32, 32),
-        'detected_wave_shape': (200, 6 * 5 * 32 * 32),
+        'detected_wave_shape': (200, 6 * 5, 32, 32),
     }),
     # 3D full grid, half time, one boundary edge
     ({
@@ -166,7 +166,7 @@ simulation_variable_params = [
         'edge': 0,
     }, {
         'grid_shape': (32, 32, 32),
-        'detected_wave_shape': (200, 32 * 32),
+        'detected_wave_shape': (200, 1, 32, 32),
     }),
 ]
 
@@ -208,6 +208,9 @@ def test_simulation(sim_dict, expected_dict):
     assert sim.grid_speed.shape == expected_dict['grid_shape']
     assert sim.detected_wave.shape == expected_dict['detected_wave_shape']
 
+    # Note that the dimensionality of the detected wave is always one plus the grid
+    assert sim.detected_wave.ndim == sim.grid_speed.ndim + 1
+
 
 @pytest.mark.parametrize("sim_dict, expected_dict", simulation_params)
 def test_single_source(sim_dict, expected_dict):
@@ -217,8 +220,11 @@ def test_single_source(sim_dict, expected_dict):
     detected_wave, grid_speed = run_single_source(**sim_dict)
 
     # Confirm output shapes are as expected
-    assert grid_speed.shape == expected_dict['grid_shape']
+    assert grid_speed.shape == (1,) + expected_dict['grid_shape']
     assert detected_wave.shape == expected_dict['detected_wave_shape']
+
+    # Note that the dimensionality of the detecteds wave matches grid
+    assert detected_wave.ndim == grid_speed.ndim
 
 
 @pytest.mark.parametrize("n_sources", [1, 2])
@@ -237,5 +243,8 @@ def test_multiple_source(sim_dict, expected_dict, n_sources):
     detected_waves, grid_speed = run_multiple_sources(**sim_dict)
 
     # Confirm output shapes are as expected
-    assert grid_speed.shape == expected_dict['grid_shape']
+    assert grid_speed.shape == (1, 1) + expected_dict['grid_shape']
     assert detected_waves.shape == (n_sources,) + expected_dict['detected_wave_shape']
+
+    # Note that the dimensionality of the detecteds wave matches grid
+    assert detected_waves.ndim == grid_speed.ndim

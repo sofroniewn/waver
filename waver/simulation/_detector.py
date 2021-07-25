@@ -60,23 +60,24 @@ class Detector(NamedTuple):
         else:
             if self.edge is None:
                 # Record number of pixels on each boundary
-                n_boundary_pixels = 0
+                boundary_shape = list(self.grid_shape)
+                boundary_shape.pop(0)
                 for dim in range(len(self.grid_shape)):
                     # Move through each dimension, considering all dims aside from that one
                     # which form an n-1 dimensional face
                     tmp_shape = list(self.grid_shape)
                     tmp_shape.pop(dim)
-                    # Add number of pixels on this face twice, once for each side.
-                    n_boundary_pixels += 2 * np.product(tmp_shape)
-                return (int(self.boundary * n_boundary_pixels),)
+                    if boundary_shape != tmp_shape:
+                        raise ValueError(f'This grid shape {self.grid_shape} does not allow for full'
+                                          ' boundary detection, try detecting at a single "edge" instead.')
+                return (int(2 * len(self.grid_shape) * self.boundary),) + tuple(boundary_shape)         
             else:
                 dim = self.edge % len(self.grid_shape)
                 # Consider all dims aside from that one which form an n-1 dimensional face
-                tmp_shape = list(self.grid_shape)
-                tmp_shape.pop(dim)
+                boundary_shape = list(self.grid_shape)
+                boundary_shape.pop(dim)
                 # Add number of pixels on this face just once
-                n_boundary_pixels = np.product(tmp_shape)
-                return (int(self.boundary * n_boundary_pixels),)            
+                return (int(self.boundary),) + tuple(boundary_shape)         
 
     def sample(self, wave):
         """Sample wave only at boundary.

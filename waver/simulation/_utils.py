@@ -71,10 +71,11 @@ def sample_boundary(wave, boundary, edge=None):
             # Take lower and upper edges
             for edge_slice in [slice(0, boundary), slice(-boundary, wave.shape[dim])]:
                 index[dim] = edge_slice
-                # Extract edge, move boundary axis to end and flatten
-                wave_at_boundary = np.moveaxis(wave[tuple(index)], dim, -1).flatten()
+                # Extract edge, move boundary axis to beginning
+                wave_at_boundary = np.moveaxis(wave[tuple(index)], dim, 0)
                 wave_detected.append(wave_at_boundary)
-        return np.concatenate(wave_detected)
+        # Concatenate boundaries along "zero" axis
+        return np.concatenate(wave_detected, axis=0)
     else:
         index = [slice(None)] * wave.ndim
         dim = edge % wave.ndim
@@ -83,8 +84,8 @@ def sample_boundary(wave, boundary, edge=None):
         else:
             edge_slice = slice(0, boundary)
         index[dim] = edge_slice
-        # Extract edge, move boundary axis to end and flatten
-        wave_at_boundary = np.moveaxis(wave[tuple(index)], dim, -1).flatten()
+        # Extract edge, move boundary axis to beginning
+        wave_at_boundary = np.moveaxis(wave[tuple(index)], dim, 0)
         return wave_at_boundary
 
 

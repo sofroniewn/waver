@@ -96,7 +96,7 @@ def run_single_source(size, spacing, location, period, duration, max_speed, time
     sim.run(duration=duration, temporal_downsample=temporal_downsample, progress=progress, leave=leave)
 
     # Return simulation wave and speed data
-    return sim.detected_wave, sim.grid_speed
+    return sim.detected_wave, np.expand_dims(sim.grid_speed, axis=0)
 
 
 def run_multiple_sources(size, spacing, sources, duration, max_speed, time_step=None,
@@ -174,4 +174,4 @@ def run_multiple_sources(size, spacing, sources, duration, max_speed, time_step=
         detected_waves.append(wave)
 
     # Return simulation wave and speed data
-    return np.stack(detected_waves, axis=0), grid_speed
+    return np.stack(detected_waves, axis=0), np.expand_dims(grid_speed, axis=0)
