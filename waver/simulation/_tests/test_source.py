@@ -1,6 +1,6 @@
 import numpy as np
 
-from waver.components._source import Source
+from waver.simulation._source import Source
 
 
 def test_source():

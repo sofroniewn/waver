@@ -2,6 +2,8 @@ import numpy as np
 from functools import lru_cache
 from typing import NamedTuple
 
+from ._utils import sample_boundary
+
 
 class Detector(NamedTuple):
     """Detector for the grid.
@@ -15,8 +17,6 @@ class Detector(NamedTuple):
         isotropic, all dimensions use the same spacing.
     spatial_downsample : int
         Spatial downsample factor.
-    temporal_downsample : int
-        Temporal downsample factor.
     boundary : int, optional
         If greater than zero, then number of pixels on the boundary
         to detect at, in downsampled coordinates. If zero then detection
@@ -29,8 +29,7 @@ class Detector(NamedTuple):
     """
     shape: tuple
     spacing: tuple
-    spatial_downsample: int
-    temporal_downsample: int
+    spatial_downsample: int=1
     boundary: int=0
     edge: int=None
 
@@ -78,3 +77,18 @@ class Detector(NamedTuple):
                 # Add number of pixels on this face just once
                 n_boundary_pixels = np.product(tmp_shape)
                 return (int(self.boundary * n_boundary_pixels),)            
+
+    def sample(self, wave):
+        """Sample wave only at boundary.
+
+        Parameters
+        ----------
+        wave : array
+            Wave that should be sampled
+
+        Returns
+        -------
+        array
+            Wave sampled at the boundary.
+        """
+        return sample_boundary(wave, self.boundary, self.edge)

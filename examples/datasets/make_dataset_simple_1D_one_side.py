@@ -3,7 +3,7 @@ from waver.datasets import generate_simulation_dataset
 
 # Define root path for simulation
 path = '/Users/nsofroniew/Documents/inverting_physics/1D_simulations/12_8mm_at_100um_1s/mixed_random_ifft/train.zarr'
-runs = 1000
+runs = 100_000
 
 # Define a simulation, 12.8mm, 100um spacing, for 60.8us
 size = (12.8e-3,)
@@ -12,7 +12,7 @@ time_step = 50e-9
 temporal_downsample = 2
 min_speed = 343
 max_speed = 686
-duration = 60.8e-6
+duration = 80e-6
 
 # Define a speed sampling method
 speed = 'mixed_random_ifft' # 'ifft'
