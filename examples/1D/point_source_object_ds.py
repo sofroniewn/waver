@@ -18,6 +18,8 @@ sim_params = {
         'period': 5e-6,
         'ncycles':1,
     }],
+    'boundary': 4,
+    'edge': 0,
 }
 
 # Run and visualize simulation

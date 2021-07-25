@@ -18,7 +18,7 @@ def generate_simulation_dataset(path, runs, **kawrgs):
         array must be of one dim more than simulation grid
         dim.
     kawrgs :
-        run_simulation kwargs.
+        run_multiple_sources kwargs.
 
     Returns
     -------
