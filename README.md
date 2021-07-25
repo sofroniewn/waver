@@ -6,7 +6,8 @@
 [![tests](https://github.com/sofroniewn/waver/workflows/tests/badge.svg)](https://github.com/sofroniewn/waver/actions)
 [![codecov](https://codecov.io/gh/sofroniewn/waver/branch/master/graph/badge.svg)](https://codecov.io/gh/sofroniewn/waver)
 
-Wave simulations (Under Construction!!!!)
+Run simulations of the wave equation in 1D, 2D, or 3D in Python. This library owes a lot of its design and approach to the
+very good [fdtd](https://github.com/flaport/fdtd) library, a Python 3D electromagnetic FDTD simulator.
 
 ----------------------------------
 
@@ -15,6 +16,11 @@ Wave simulations (Under Construction!!!!)
 You can install `waver` via [pip]:
 
     pip install waver
+
+## Usage
+
+A number of couple of convenience methods have been ....
+
 
 ## Contributing
 
