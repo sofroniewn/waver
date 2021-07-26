@@ -120,15 +120,59 @@ def generate_grid_speed(method, shape, speed_range):
             values.append(ifft_sample_1D(length))
         output = np.einsum(subs[len(values)], *values)
         speed = speed_range[0] + output * (speed_range[1] - speed_range[0])
+    elif method == 'fourier':
+        output = fourier_sample(shape)
+        speed = speed_range[0] + output * (speed_range[1] - speed_range[0])
     elif method == 'mixed_random_ifft':
         if np.random.rand() > 0.5:
             speed = generate_grid_speed('random', shape, speed_range)
         else:
             speed = generate_grid_speed('ifft', shape, speed_range)
+    elif method == 'mixed_random_fourier':
+        if np.random.rand() > 0.5:
+            speed = generate_grid_speed('random', shape, speed_range)
+        else:
+            speed = generate_grid_speed('fourier', shape, speed_range)
     else:
         raise ValueError(f'Speed sampling method {method} not recognized for this grid shape')
 
     return speed
+
+
+def fourier_sample(shape):
+    """Randomly sample an array based on a fourier method.
+
+    Parameters
+    ----------
+    shape : tuple of int
+        Shape of array to be generated.
+
+    Returns
+    -------
+    np.ndarray
+        Array randomly sampled with a fourier method.
+    """
+    ndim = len(shape)
+
+    freq_cutoffs = tuple(np.random.randint(int(length / 2) - 1) + 1 for length in shape)
+    weight_shape = tuple(2 * f for f in freq_cutoffs)
+
+    weights = np.random.random(weight_shape)
+    weights = weights / np.sum(weights)
+    phi = np.random.random(weight_shape) * 2 * np.pi
+
+    slices_freq = tuple(slice(-f, f) for f in freq_cutoffs)
+    slices_values = tuple(slice(0, 1, 1/s) for s in shape)
+    mesh_values = np.mgrid[slices_values + slices_freq]
+
+    mesh_sum = np.sum([mesh_values[d]*mesh_values[d+ndim] for d in range(ndim)], axis=0)
+
+    values = np.sum(weights * np.cos(mesh_sum + phi), axis=tuple(d+ndim for d in range(ndim)))
+    values = values - values.min()
+    max_val = values.max()
+    if max_val > 0:
+        values = values / max_val
+    return values
 
 
 def ifft_sample_1D(length):

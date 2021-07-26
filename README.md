@@ -6,7 +6,12 @@
 [![tests](https://github.com/sofroniewn/waver/workflows/tests/badge.svg)](https://github.com/sofroniewn/waver/actions)
 [![codecov](https://codecov.io/gh/sofroniewn/waver/branch/master/graph/badge.svg)](https://codecov.io/gh/sofroniewn/waver)
 
-Wave simulations (Under Construction!!!!)
+Run simulations of the [wave equation](https://en.wikipedia.org/wiki/Wave_equation) in 1D, 2D, or 3D in Python. This library owes a lot of its design and approach to the [fdtd](https://github.com/flaport/fdtd) library, a Python 3D electromagnetic FDTD simulator.
+
+Some of the examples use [napari](https://napari.org/), a multi-dimensional image viewer for Python, to allow for easy visualization of the detected wave. Some functionality is also available as a napari plugin to allow for running simulations
+from a graphical user interface.
+
+This package is still pre-alpha and under construction!!
 
 ----------------------------------
 
@@ -15,6 +20,17 @@ Wave simulations (Under Construction!!!!)
 You can install `waver` via [pip]:
 
     pip install waver
+
+## Usage
+
+TO BE ADDED ......
+
+## Known Limitations
+
+Right now boundary handling is not done very well. I'd like to add a [perfectly matched layer](https://en.wikipedia.org/wiki/Perfectly_matched_layer) boundary, but havn't done so yet. Contributions would be welcome.
+
+Right now the simulations are quite slow. I'd like to add a [JAX](https://github.com/google/jax) backend, but 
+havn't done so yet. Contributions would be welcome.
 
 ## Contributing
 

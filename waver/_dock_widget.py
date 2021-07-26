@@ -2,6 +2,7 @@ from magicgui import magic_factory
 from napari_plugin_engine import napari_hook_implementation
 from napari.utils import Colormap
 from .simulation import run_single_source
+from .simulation._utils import fourier_sample
 
 
 @magic_factory(call_button="run",
@@ -72,6 +73,22 @@ def simulation(
     return [(detected_wave, wave_dict, 'Image'), (detected_speed, speed_dict, 'Image')]
 
 
+@magic_factory(call_button="run",
+              ndim={'min': 1, 'max':3, 'step': 1},
+              length={'min': 1, 'max':1e5, 'step': 1},
+              )
+def sample_fourier(
+               ndim: int=2,
+               length: int=32,
+               ) -> 'napari.types.LayerDataTuple':
+    """Run a single simulation.
+    """
+    shape = ndim * (length,) # length always same in all dimensions
+    values = fourier_sample(shape)
+    values_dict = {'colormap': 'viridis', 'contrast_limits':[0, 1], 'name': 'fourier sample', 'interpolation': 'bilinear'}
+    return [(values, values_dict, 'Image')]
+
+
 @napari_hook_implementation
 def napari_experimental_provide_dock_widget():
-    return simulation
+    return [simulation, sample_fourier]
