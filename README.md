@@ -162,7 +162,7 @@ print('wave: ', sim.detected_wave)
 print('speed: ', sim.grid_speed)
 ```
 
-Note these sets are done inside the `run_single_source` method for you as a convenience.
+Note these steps are done inside the `run_single_source` method for you as a convenience.
 
 ## Known Limitations
 
