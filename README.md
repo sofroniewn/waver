@@ -17,7 +17,7 @@ This package allows for a fair amount of customization over your wave simulation
  - record the wave with a detector, which can be the full grid, the full boundary, or a particular boundary
  - use convenience methods to run many simulations with different sources on the same grid and detector combination
 
-Use can use [napari](https://napari.org/), a multi-dimensional image viewer for Python, to allow for easy visualization of the detected wave. Some functionality is also available as a napari plugin to allow for running simulations from a graphical user interface.
+You can use [napari](https://napari.org/), a multi-dimensional image viewer for Python, to allow for easy visualization of the detected wave. Some functionality is also available as a napari plugin to allow for running simulations from a graphical user interface.
 
 Results can look like
 
