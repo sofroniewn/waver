@@ -11,6 +11,8 @@ Run simulations of the [wave equation](https://en.wikipedia.org/wiki/Wave_equati
 Some of the examples use [napari](https://napari.org/), a multi-dimensional image viewer for Python, to allow for easy visualization of the detected wave. Some functionality is also available as a napari plugin to allow for running simulations
 from a graphical user interface.
 
+This package is still pre-alpha and under construction!!
+
 ----------------------------------
 
 ## Installation
@@ -21,7 +23,7 @@ You can install `waver` via [pip]:
 
 ## Usage
 
-A number of couple of convenience methods have been ....
+TO BE ADDED ......
 
 ## Known Limitations
 
