@@ -1,6 +1,5 @@
 
 import napari
-from waver import datasets
 from waver.datasets import load_simulation_dataset
 
 # Define root path for simulation

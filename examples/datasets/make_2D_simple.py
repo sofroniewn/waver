@@ -23,5 +23,5 @@ sim_params = {
     'edge': 1,
 }
 
-# Run and visualize simulation
+# Run and save simulation
 generate_simulation_dataset(path, runs, **sim_params)

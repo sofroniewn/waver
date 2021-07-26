@@ -1,4 +1,3 @@
-import numpy as np
 from waver.datasets import run_and_visualize
 
 # Define a simulation, 12.8mm, 100um spacing

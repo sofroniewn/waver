@@ -9,7 +9,7 @@ rescaled_image = np.eye(128, 128)
 normed_image = 343 + 343 * rescaled_image
 runs = [normed_image]
 
-# Define a simulation, 12.8mm, 100um spacing, for 60.8us (with 100ns timesteps)
+# Define a simulation, 12.8mm, 100um spacing
 sim_params = {
     'size': (12.8e-3, 12.8e-3),
     'spacing': 100e-6,
@@ -28,5 +28,5 @@ sim_params = {
     'edge': 1,
 }
 
-# Run and visualize simulation
+# Run and save simulation
 generate_simulation_dataset(path, runs, **sim_params)
