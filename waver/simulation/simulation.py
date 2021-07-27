@@ -252,7 +252,10 @@ class Simulation:
             If provided detect only at that particular "edge", which in 1D is
             a point, 2D a line, 3D a plane etc. The particular edge is determined
             by indexing around the grid. It None is provided then all edges are
-            used.  
+            used.
+        with_pml : bool, optional
+            If detector should also record values at the perfectly matched layer.
+            The boundary should always be set to zero if this option is used.
         """
         self._run = False
         self._record_with_pml = with_pml
