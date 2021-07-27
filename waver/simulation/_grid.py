@@ -16,6 +16,7 @@ class Grid(NamedTuple):
     """
     size: Tuple[float, ...]
     spacing: float
+    pml_thickness: int=50
 
     @property
     @lru_cache(1)
@@ -28,3 +29,9 @@ class Grid(NamedTuple):
     def shape(self):
         """tuple of int: Shape of the grid."""
         return tuple(int(_size//self.spacing) for _size in self.size)
+
+    @property
+    @lru_cache(1)
+    def full_shape(self):
+        """tuple of int: Shape of the grid."""
+        return tuple(s + 2 * self.pml_thickness for s in self.shape)

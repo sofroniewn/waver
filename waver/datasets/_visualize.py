@@ -17,7 +17,7 @@ def run_and_visualize(**kawrgs):
 
     clim = max(wave[0].max(), abs(wave[0].min())) / 3**wave[0].ndim
     wave_cmap = Colormap([[0.55, 0, .32, 1], [0, 0, 0, 0], [0.15, 0.4, 0.1, 1]], name='PBlG')
-    wave_dict = {'colormap': wave_cmap, 'contrast_limits':[-clim, clim], 'name': 'wave',
+    wave_dict = {'colormap': 'PiYG', 'contrast_limits':[-8, 8], 'name': 'wave',
         'metadata':kawrgs, 'interpolation': 'bilinear'}
 
     speed_cmap = Colormap([[0, 0, 0, 0], [0.7, 0.5, 0, 1]], name='Orange')
