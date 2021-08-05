@@ -21,7 +21,7 @@ You can use [napari](https://napari.org/), a multi-dimensional image viewer for 
 
 Results can look like
 
-https://user-images.githubusercontent.com/6531703/126925300-3c77ca9f-a7fe-417b-9b58-2d143425b147.mp4
+https://user-images.githubusercontent.com/6531703/128283012-a784ec06-4df9-4ddf-bf4f-e21b927fe4a3.mov
 
 ----------------------------------
 
