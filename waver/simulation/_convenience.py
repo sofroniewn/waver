@@ -6,7 +6,7 @@ from ._utils import generate_grid_speed
 from .simulation import Simulation
 
 
-def run_single_source(size, spacing, location, period, duration, max_speed, time_step=None,
+def run_single_source(size, spacing, location, period, duration, max_speed, time_step=None, pml_thickness=20,
                    speed=None, min_speed=0, spatial_downsample=1, temporal_downsample=1,
                    boundary=0, edge=None, ncycles=1, phase=0, progress=True, leave=False):
     """Convenience method to run a single simulation with a single source.
@@ -35,6 +35,8 @@ def run_single_source(size, spacing, location, period, duration, max_speed, time
         this speed will be used to derive the time step.
     time_step : float, optional
         Time step to use if stable.
+    pml_thickness : int
+        Thickness of any perfectly matched layer in pixels.
     speed : float, array, or str, optional
         Speed of the wave in meters per second. If a float then
         speed is assumed constant across the whole grid. If an
@@ -75,7 +77,7 @@ def run_single_source(size, spacing, location, period, duration, max_speed, time
     """
 
     # Create a simulation
-    sim = Simulation(size=size, spacing=spacing, max_speed=max_speed, time_step=time_step)
+    sim = Simulation(size=size, spacing=spacing, max_speed=max_speed, time_step=time_step, pml_thickness=pml_thickness)
 
     if isinstance(speed, str):
         # Generate speed according to method.
@@ -99,7 +101,7 @@ def run_single_source(size, spacing, location, period, duration, max_speed, time
     return sim.detected_wave, np.expand_dims(sim.grid_speed, axis=0)
 
 
-def run_multiple_sources(size, spacing, sources, duration, max_speed, time_step=None,
+def run_multiple_sources(size, spacing, sources, duration, max_speed, time_step=None, pml_thickness=20,
                    speed=None, min_speed=0, spatial_downsample=1, temporal_downsample=1,
                    boundary=0, edge=None, progress=True, leave=False):
     """Convenience method to run a single simulation with multiple sources.
@@ -122,6 +124,8 @@ def run_multiple_sources(size, spacing, sources, duration, max_speed, time_step=
         this speed will be used to derive the time step.
     time_step : float, optional
         Time step to use if stable.
+    pml_thickness : int
+        Thickness of any perfectly matched layer in pixels.
     speed : float, array, or str, optional
         Speed of the wave in meters per second. If a float then
         speed is assumed constant across the whole grid. If an
@@ -157,9 +161,9 @@ def run_multiple_sources(size, spacing, sources, duration, max_speed, time_step=
     """
     if isinstance(speed, str):
         # Create a simulation
-        sim = Simulation(size=size, spacing=spacing, max_speed=max_speed, time_step=time_step)
+        sim = Simulation(size=size, spacing=spacing, max_speed=max_speed, time_step=time_step, pml_thickness=pml_thickness)
 
-        # Generate speed according to method.
+        # Generate speed according to method
         speed = generate_grid_speed(speed, sim.grid.shape, (min_speed, max_speed))
 
 
@@ -167,7 +171,7 @@ def run_multiple_sources(size, spacing, sources, duration, max_speed, time_step=
 
     # Move through sources
     for j, source in enumerate(tqdm(sources, leave=False)):
-        wave, grid_speed = run_single_source(size=size, spacing=spacing, **source,
+        wave, grid_speed = run_single_source(size=size, spacing=spacing, **source, pml_thickness=pml_thickness,
                 duration=duration, max_speed=max_speed, time_step=time_step, speed=speed, min_speed=min_speed,
                 spatial_downsample=spatial_downsample, temporal_downsample=temporal_downsample,
                 boundary=boundary, edge=edge, progress=progress, leave=leave)

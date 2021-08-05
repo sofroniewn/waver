@@ -120,6 +120,7 @@ simulation_variable_params = [
         'temporal_downsample': 1,
         'boundary': 0,
         'edge': None,
+        'pml_thickness': 2,
     }, {
         'grid_shape': (32, 32, 32),
         'detected_wave_shape': (400, 32, 32, 32),
@@ -131,6 +132,7 @@ simulation_variable_params = [
         'temporal_downsample': 2,
         'boundary': 0,
         'edge': None,
+        'pml_thickness': 2,
     }, {
         'grid_shape': (32, 32, 32),
         'detected_wave_shape': (200, 32, 32, 32),
@@ -142,6 +144,7 @@ simulation_variable_params = [
         'temporal_downsample': 2,
         'boundary': 1,
         'edge': None,
+        'pml_thickness': 2,
     }, {
         'grid_shape': (32, 32, 32),
         'detected_wave_shape': (200, 6, 32, 32),
@@ -153,6 +156,7 @@ simulation_variable_params = [
         'temporal_downsample': 2,
         'boundary': 5,
         'edge': None,
+        'pml_thickness': 2,
     }, {
         'grid_shape': (32, 32, 32),
         'detected_wave_shape': (200, 6 * 5, 32, 32),
@@ -164,6 +168,7 @@ simulation_variable_params = [
         'temporal_downsample': 2,
         'boundary': 1,
         'edge': 0,
+        'pml_thickness': 2,
     }, {
         'grid_shape': (32, 32, 32),
         'detected_wave_shape': (200, 1, 32, 32),
@@ -189,7 +194,8 @@ def test_simulation(sim_dict, expected_dict):
     
     # Create simulation
     sim = Simulation(size=sim_dict['size'], spacing=sim_dict['spacing'],
-        max_speed=sim_dict['max_speed'], time_step=sim_dict['time_step'])
+        max_speed=sim_dict['max_speed'], time_step=sim_dict['time_step'],
+        pml_thickness=sim_dict.get('pml_thickness', 20))
 
     # Add source
     sim.add_source(location=sim_dict['location'], period=sim_dict['period'])

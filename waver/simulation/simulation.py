@@ -7,7 +7,7 @@ from ._detector import Detector
 from ._grid import Grid
 from ._source import Source
 from ._time import Time
-from ._wave import wave_equantion_update
+from ._wave import WaveEquation
 
 
 class Simulation:
@@ -23,7 +23,7 @@ class Simulation:
 
     Right now only one source and one detector can be used per simulation.
     """
-    def __init__(self, *, size, spacing, max_speed, time_step=None):
+    def __init__(self, *, size, spacing, max_speed, time_step=None, pml_thickness=20):
         """
         Parameters
         ----------
@@ -45,14 +45,16 @@ class Simulation:
         time_step : float, optional
             Time step to use if simulation will be stable. It must be
             smaller than the largest allowed time step.
+        pml_thickness : int
+            Thickness of any perfectly matched layer in pixels.
         """
 
         # Create grid
-        self._grid = Grid(size=size, spacing=spacing)
+        self._grid = Grid(size=size, spacing=spacing, pml_thickness=pml_thickness)
         
         # Set default speed array
         self._max_speed = max_speed
-        self._grid_speed = np.full(self._grid.shape, max_speed)
+        self._grid_speed = np.full(self.grid.shape, max_speed)
 
         # Calculate the theoretically optical courant number
         # given the dimensionality of the grid
@@ -75,11 +77,11 @@ class Simulation:
             self._time_step = coef * power
 
         # Initialize some unset attributes
+        self._record_with_pml = None
         self._time = None
         self._source = None
         self._detector = None
-        self._wave_current = None
-        self._wave_previous = None
+        self._wave_equation = None
         self._detected_wave = None
         self._run = False
 
@@ -157,8 +159,17 @@ class Simulation:
         # Create time object based on duration of run
         self._time = Time(step=self._time_step, duration=duration, temporal_downsample=temporal_downsample)
 
-        self._wave_current = np.zeros(self.grid.shape)
-        self._wave_previous = np.zeros(self.grid.shape)
+        # Pad grid speed if a pml is being used
+        grid_speed = np.pad(self.grid_speed, self.grid.pml_thickness, 'edge')
+
+        # Initialize new wave equation
+        wave = np.zeros(self.grid.full_shape)
+        self._wave_equation = WaveEquation(wave,
+                                           c=grid_speed,
+                                           dt=self.time.step,
+                                           dx=self.grid.spacing,
+                                           pml=self.grid.pml_thickness
+                                           )
 
         # Create detector arrays for wave and source
         full_shape = (self.time.nsteps_detected,) + self.detector.downsample_shape
@@ -191,40 +202,40 @@ class Simulation:
         if self._detector is None:
             raise ValueError('Please add a detector before running, use Simulation.add_detector')
 
+        if self.grid.pml_thickness > 0 and not self._record_with_pml:
+            recorded_slice = (slice(self.grid.pml_thickness, -self.grid.pml_thickness),) * self.grid_speed.ndim
+        else:
+            recorded_slice = (slice(None), ) * self.grid_speed.ndim
+
         for current_step in tqdm(range(self.time.nsteps), disable=not progress, leave=leave):
             current_time = self.time.step * current_step
 
             # Get current source values
             source_current = self._source.value(current_time)
+            source_current = np.pad(source_current, self.grid.pml_thickness, 'constant')
 
             # Compute the next wave values
-            wave_tmp =  wave_equantion_update(U_1=self._wave_current, 
-                                              U_0=self._wave_previous,
-                                              c=self.grid_speed,
-                                              Q_1=source_current,
-                                              dt=self.time.step,
-                                              dx=self.grid.spacing
-                                             )
-
-            self._wave_previous = self._wave_current
-            self._wave_current = wave_tmp
+            self._wave_equation.update(Q=source_current)
+            wave_current = self._wave_equation.wave
 
             # If recored timestep then use detector
             if current_step % self._time.temporal_downsample == 0:
                 index = int(current_step // self._time.temporal_downsample)
 
                 # Record wave on detector
-                wave_current_ds = self._wave_current[self.detector.grid_index]
+                wave_current = wave_current[recorded_slice]                
+                wave_current_ds = wave_current[self.detector.grid_index]
                 self._detected_wave[index] = self.detector.sample(wave_current_ds)
 
                 # Record source on detector
+                source_current = source_current[recorded_slice]
                 source_current_ds = source_current[self.detector.grid_index]
                 self._detected_source[index] = self.detector.sample(source_current_ds)
 
         # Simulation has finished running
         self._run = True
 
-    def add_detector(self, *, spatial_downsample=1, boundary=0, edge=None):
+    def add_detector(self, *, spatial_downsample=1, boundary=0, edge=None, with_pml=False):
         """Add a detector to the simulaiton.
         
         Note this must be done before the simulation can be run.
@@ -241,10 +252,18 @@ class Simulation:
             If provided detect only at that particular "edge", which in 1D is
             a point, 2D a line, 3D a plane etc. The particular edge is determined
             by indexing around the grid. It None is provided then all edges are
-            used.  
+            used.
+        with_pml : bool, optional
+            If detector should also record values at the perfectly matched layer.
+            The boundary should always be set to zero if this option is used.
         """
         self._run = False
-        self._detector = Detector(shape=self.grid.shape,
+        self._record_with_pml = with_pml
+        if self._record_with_pml:
+            grid_shape = self.grid.full_shape
+        else:
+            grid_shape = self.grid.shape
+        self._detector = Detector(shape=grid_shape,
                                   spacing=self.grid.spacing,
                                   spatial_downsample=spatial_downsample,
                                   boundary=boundary,
@@ -283,18 +302,3 @@ class Simulation:
                               period=period,
                               ncycles=ncycles,
                               phase=phase)
-
-    # def set_boundaries(boundaries):
-    #     """Set boundary conditions
-        
-    #     Parameters
-    #     ----------
-    #     boundaries : list of 2-tuple of str
-    #         For each axis, a 2-tuple of the boundary conditions where the 
-    #         first and second values correspond to low and high boundaries
-    #         of the axis. The acceptable boundary conditions are `PML` and
-    #         `periodic` for Perfectly Matched Layer, and periodic conditions
-    #         respectively.
-    #     """
-    #     # Not yet implemented
-    #     pass

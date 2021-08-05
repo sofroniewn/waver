@@ -166,7 +166,7 @@ Note these steps are done inside the `run_single_source` method for you as a con
 
 ## Known Limitations
 
-Right now boundary handling is not done very well. I'd like to add a [perfectly matched layer](https://en.wikipedia.org/wiki/Perfectly_matched_layer) boundary, but havn't done so yet. Contributions would be welcome.
+A [perfectly matched layer](https://en.wikipedia.org/wiki/Perfectly_matched_layer) boundary has recently been added, but might not perform well under all conditions. Additional contributions would be welcome here.
 
 Right now the simulations are quite slow. I'd like to add a [JAX](https://github.com/google/jax) backend, but 
 havn't done so yet. Contributions would be welcome.
