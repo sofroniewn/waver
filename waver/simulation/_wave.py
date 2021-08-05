@@ -1,70 +1,86 @@
 import numpy as np
-from scipy.ndimage import laplace
+from ._utils import gradient, divergence, make_pml_sigma
 
 
-def wave_equantion_update(U_1, U_0, c, Q_1, dt, dx, boundary):
-    """Calculate the updated wave using a FDTD method.
-
-    We use a second order method that takes the current wave,
-    the wave at the previous time point, the spatially varying
-    speed, the forcing function at the current time point, and
-    the spatial and temporal grid steps and calculates the value
-    of the wave at the next time step.
-
-    Parameters
-    ----------
-    U_1 : array
-        Value of the wave at the current time point.
-    U_0 : array
-        Value of the wave at the previous time point.
-    c : array
-        Speed of the wave in meters per second. Must be the
-        same shape as the grid.
-    Q_1 : array
-        Value of the forcing function on the wave equation at the
-        current time point. Must be same shape as the grid.
-    dt : float
-        Timestep for the simulation in seconds.
-    dx : float
-        Spacing of the grid in meters. The grid is assumed to be
-        isotropic, all dimensions use the same spacing.
-    boundary : int
-        Thickness of a perfectly matched layer at the boundary.
-
-    Returns
-    -------
-    U_2 : array
-        Value of the wave at the next time point.
+class WaveEquation:
+    """Class that does the wave equation update
+    
+    Attributes
+    ---------- 
     """
+    def __init__(self, wave, *, c, dt, dx, pml=0):
 
-    U_2 = 2 * U_1 - U_0 + (c * dt / dx)**2 * laplace(U_1, mode='constant')
+        # Store update parameters
+        self._dt = dt
+        self._D = dt / dx
+        self._c = c
+        self._c2 = c ** 2
+        self._pml_thickness = pml
+        self._sigma_max = pml
+        self._ndim = wave.ndim
+
+        # Initialize Pressure and Velocity
+        self._P = wave
+        self._v = np.zeros((self._ndim,) + wave.shape)
+
+        # Initialize with an empty auxillary factors
+        self._psi = np.zeros(self._v.shape)
+
+        # Create sigma factor for pml
+        self._sigma = make_pml_sigma(wave.shape, self._sigma_max, self._pml_thickness)
+        self._sigma_factors = [np.product([s for i, s in enumerate(self._sigma) if i != dim], axis=0)
+                                for dim in range(len(self._sigma))]
+
+    def update(self, Q=0):
+        """Update the wave equation"""
+
+        # Update velocity vector array
+        grad_P = gradient(self._P)
+        pml_correction = self._dt * self._c * self._sigma * self._v
+        self._v -= self._D * grad_P + pml_correction
+
+        # Update pressure scalar array
+        div_v = divergence(self._v)
+        pml_correction = self._dt * self._c * np.sum(self._sigma, axis=0) * self._P
+        # Additional factor using auxilary variables don't seem to be needed ......
+        # for dim, psi in enumerate(self._psi):
+        #     pml_correction += self._D * self._c2 * self._sigma_factors[dim] * gradient(self._psi[dim], axis=dim)
+        self._P -=  self._D * self._c2 * div_v + pml_correction - Q
+
+        # Note auxilary variables don't seem to be needed ......
+        # Update auxilary equations for perfectly matched layer correction
+        # self._psi += self._dt * self._c * self._v
+
+    @property
+    def wave(self):
+        """np.ndarray: Wave."""
+        return self._P
 
 
-    # Attempt a perfectly matched layer correction
-    grad = np.gradient(U_1)
-    # If 1D then an array is returned, convert into list
-    if U_1.ndim == 1:
-        grad = [grad]
+# class WaveEquation:
+#     """Class that does the wave equation update
+    
+#     Attributes
+#     ---------- 
+#     """
+#     def __init__(self, wave, *, c, dt, dx, pml=0):
 
-    for dim in range(U_1.ndim):
-        slice_indices = (slice(0, boundary), slice(-boundary, U_1.shape[dim]))
-        shape_boundary = list(U_1.shape)
-        shape_boundary[dim] = boundary
-        ones_shape = [1] * U_1.ndim
-        ones_shape[dim] = boundary
-        for edge, sign in zip(slice_indices, (1, -1)):
-            index = [slice(None)] * U_1.ndim
-            index[dim] = edge
-            index = tuple(index)
-            if sign == -1:
-                attenuation_ramp = np.linspace(0, 1, boundary)
-            else:
-                attenuation_ramp = np.linspace(1, 0, boundary)
-            attenuation = np.reshape(attenuation_ramp, ones_shape)
-            attenuation = np.broadcast_to(attenuation, shape_boundary)
-            U_2[index] = U_2[index] - sign * (c[index] * dt / dx) * grad[dim][index] * attenuation
+#         # Store update parameters
+#         self._D = dt / dx
+#         self._c2 = c ** 2
+        
+#         # Initialize Pressure and Velocity
+#         self._wave = wave
+#         self._wave_1 = wave
 
-    # Add forcing function, after boundary condition met
-    U_2 = U_2 + Q_1
+#     def update(self, Q=0):
+#         """Update the wave equation"""
 
-    return U_2
+#         wave = 2 * self._wave - self._wave_1 + self._c2 * self._D**2 * laplace(self._wave, mode='constant') + Q
+#         self._wave_1 = self._wave
+#         self._wave = wave
+
+#     @property
+#     def wave(self):
+#         """np.ndarray: Wave."""
+#         return self._wave

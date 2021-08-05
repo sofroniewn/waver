@@ -16,7 +16,7 @@ class Grid(NamedTuple):
     """
     size: Tuple[float, ...]
     spacing: float
-    pml_thickness: int=50
+    pml_thickness: int=20
 
     @property
     @lru_cache(1)

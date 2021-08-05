@@ -197,3 +197,98 @@ def ifft_sample_1D(length):
     shift = np.random.randint(length)
     output = np.roll(ifft(values), shift)
     return np.clip(np.abs(output), 0, 1)
+
+
+def gradient(f, axis=None):
+    """Take the gradient of a scalar array
+    
+    Parameters
+    ----------
+    f : np.ndarray
+        Scalar array whose gradient should be taken.
+    axis : int, optional
+        If axis is provided gradient is returned only for
+        that axis.
+
+    Returns
+    -------
+    out : np.ndarray
+        Vector array of gradients. Dimensionality one larger
+        than the scalar array.
+    """
+    if axis is None:
+        # out = np.zeros((f.ndim,) + f.shape)
+        # out[0, :-1, :] += f[1:, :] - f[:-1, :]
+        # out[1, :, :-1] += f[:, 1:] - f[:, :-1]
+
+        out = [np.diff(f, axis=i, append=0) for i in range(f.ndim)]
+        return np.array(out)
+    else:
+        out = np.diff(f, axis=axis, append=0)
+        return out
+
+
+def divergence(f):
+    """Take the divergence of a vector array
+    
+    Parameters
+    ----------
+    f : np.ndarray
+        Vector array whose divergence should be taken.
+
+    Returns
+    -------
+    out : np.ndarray
+        Scalar array of divergence. Dimensionality one less
+        than the vector array.
+    """
+    out = np.sum([np.diff(v, axis=i, prepend=0) for i, v in enumerate(f)], axis=0)
+
+    # out = np.zeros(f.shape[1:])
+    # out[1:, :] += f[0, 1:, :] - f[0, :-1, :]
+    # out[:, 1:] += f[1, :, 1:] - f[1, :, :-1]
+
+    return out
+
+
+def make_pml_sigma(shape, sigma_max, pml_thickness, exponent=3):
+    """Make sigma values for a perfectly matched layer
+    
+    Parameters
+    ----------
+    shape : tuple
+        Shape of the array.
+    sigma_max : float
+        Maximum value of the pml before exponent scaling.
+    pml_thickness : int
+        Thickness of the perfectly matched layer in pixels.
+    exponent : int, optional
+        Exponent to scale pml with.
+
+    Returns
+    -------
+    out : np.ndarray
+        Vector array of sigma values for pml
+    """
+    # Create sigma factor for pml
+    ndim = len(shape)
+    full_shape = (ndim,) + shape
+    sigma = np.zeros(full_shape)
+    for dim in range(ndim):
+        full_indices = [slice(None)] * ndim
+        boundary_shape = [1] * ndim
+        boundary_shape[dim] = pml_thickness
+
+        # Bottom edge
+        slice_indices = slice(0, pml_thickness)
+        full_indices[dim] = slice_indices
+        boundary = np.linspace(sigma_max, 0, pml_thickness) ** exponent
+        sigma[(dim,) + tuple(full_indices)] = np.reshape(boundary, boundary_shape)
+
+        # Top edge
+        slice_indices = slice(-pml_thickness, shape[dim])
+        full_indices[dim] = slice_indices
+        boundary = np.linspace(0, sigma_max, pml_thickness) ** exponent
+        sigma[(dim,) + tuple(full_indices)] = np.reshape(boundary, boundary_shape)
+
+    return sigma

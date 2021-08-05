@@ -7,7 +7,7 @@ from ._detector import Detector
 from ._grid import Grid
 from ._source import Source
 from ._time import Time
-from ._wave import wave_equantion_update
+from ._wave import WaveEquation
 
 
 class Simulation:
@@ -79,8 +79,7 @@ class Simulation:
         self._time = None
         self._source = None
         self._detector = None
-        self._wave_current = None
-        self._wave_previous = None
+        self._wave_equation = None
         self._detected_wave = None
         self._run = False
 
@@ -158,8 +157,17 @@ class Simulation:
         # Create time object based on duration of run
         self._time = Time(step=self._time_step, duration=duration, temporal_downsample=temporal_downsample)
 
-        self._wave_current = np.zeros(self.grid.full_shape)
-        self._wave_previous = np.zeros(self.grid.full_shape)
+        # Pad grid speed if a pml is being used
+        grid_speed = np.pad(self.grid_speed, self.grid.pml_thickness, 'edge')
+
+        # Initialize new wave equation
+        wave = np.zeros(self.grid.full_shape)
+        self._wave_equation = WaveEquation(wave,
+                                           c=grid_speed,
+                                           dt=self.time.step,
+                                           dx=self.grid.spacing,
+                                           pml=self.grid.pml_thickness
+                                           )
 
         # Create detector arrays for wave and source
         full_shape = (self.time.nsteps_detected,) + self.detector.downsample_shape
@@ -192,8 +200,10 @@ class Simulation:
         if self._detector is None:
             raise ValueError('Please add a detector before running, use Simulation.add_detector')
 
-        grid_speed = np.pad(self.grid_speed, self.grid.pml_thickness, 'edge')
-        pml_slice = (slice(self.grid.pml_thickness, -self.grid.pml_thickness),) * grid_speed.ndim
+        if self.grid.pml_thickness > 0 and not self._record_with_pml:
+            recorded_slice = (slice(self.grid.pml_thickness, -self.grid.pml_thickness),) * self.grid_speed.ndim
+        else:
+            recorded_slice = (slice(None), ) * self.grid_speed.ndim
 
         for current_step in tqdm(range(self.time.nsteps), disable=not progress, leave=leave):
             current_time = self.time.step * current_step
@@ -203,39 +213,27 @@ class Simulation:
             source_current = np.pad(source_current, self.grid.pml_thickness, 'constant')
 
             # Compute the next wave values
-            wave_tmp =  wave_equantion_update(U_1=self._wave_current, 
-                                              U_0=self._wave_previous,
-                                              c=grid_speed,
-                                              Q_1=source_current,
-                                              dt=self.time.step,
-                                              dx=self.grid.spacing,
-                                              boundary=self.grid.pml_thickness
-                                             )
-
-            self._wave_previous = self._wave_current
-            self._wave_current = wave_tmp
+            self._wave_equation.update(Q=source_current)
+            wave_current = self._wave_equation.wave
 
             # If recored timestep then use detector
             if current_step % self._time.temporal_downsample == 0:
                 index = int(current_step // self._time.temporal_downsample)
 
                 # Record wave on detector
-                wave_current = self._wave_current
-                if not self._record_with_pml:
-                    wave_current = wave_current[pml_slice]                
+                wave_current = wave_current[recorded_slice]                
                 wave_current_ds = wave_current[self.detector.grid_index]
                 self._detected_wave[index] = self.detector.sample(wave_current_ds)
 
                 # Record source on detector
-                if not self._record_with_pml:
-                    source_current = source_current[pml_slice]
+                source_current = source_current[recorded_slice]
                 source_current_ds = source_current[self.detector.grid_index]
                 self._detected_source[index] = self.detector.sample(source_current_ds)
 
         # Simulation has finished running
         self._run = True
 
-    def add_detector(self, *, spatial_downsample=1, boundary=0, edge=None, with_pml=True):
+    def add_detector(self, *, spatial_downsample=1, boundary=0, edge=None, with_pml=False):
         """Add a detector to the simulaiton.
         
         Note this must be done before the simulation can be run.
