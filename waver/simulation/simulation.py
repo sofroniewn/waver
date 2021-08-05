@@ -23,7 +23,7 @@ class Simulation:
 
     Right now only one source and one detector can be used per simulation.
     """
-    def __init__(self, *, size, spacing, max_speed, time_step=None):
+    def __init__(self, *, size, spacing, max_speed, time_step=None, pml_thickness=20):
         """
         Parameters
         ----------
@@ -45,10 +45,12 @@ class Simulation:
         time_step : float, optional
             Time step to use if simulation will be stable. It must be
             smaller than the largest allowed time step.
+        pml_thickness : int
+            Thickness of any perfectly matched layer in pixels.
         """
 
         # Create grid
-        self._grid = Grid(size=size, spacing=spacing)
+        self._grid = Grid(size=size, spacing=spacing, pml_thickness=pml_thickness)
         
         # Set default speed array
         self._max_speed = max_speed

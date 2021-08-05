@@ -13,10 +13,12 @@ class Grid(NamedTuple):
     spacing : float
         Spacing of the grid in meters. The grid is assumed to be
         isotropic, all dimensions use the same spacing.
+    pml_thickness : int
+        Thickness of any perfectly matched layer in pixels.
     """
     size: Tuple[float, ...]
     spacing: float
-    pml_thickness: int=20
+    pml_thickness: int=0
 
     @property
     @lru_cache(1)
