@@ -15,7 +15,7 @@ def run_and_visualize(**kawrgs):
     """
     wave, speed = run_multiple_sources(**kawrgs)
 
-    clim = max(wave[0].max(), abs(wave[0].min())) / 3**wave[0].ndim
+    clim = np.percentile(wave, 99)
     wave_cmap = Colormap([[0.55, 0, .32, 1], [0, 0, 0, 0], [0.15, 0.4, 0.1, 1]], name='PBlG')
     wave_dict = {'colormap': wave_cmap, 'contrast_limits':[-clim, clim], 'name': 'wave',
         'metadata':kawrgs, 'interpolation': 'bilinear'}

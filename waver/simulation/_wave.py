@@ -21,14 +21,15 @@ class WaveEquation:
 
         # Initialize Pressure and Velocity
         self._P = wave
+        self._P_1 = wave
         self._v = np.zeros((self._ndim,) + wave.shape)
 
         # Initialize with an empty auxillary factors
-        self._psi = np.zeros(self._v.shape)
+        # self._psi = np.zeros(self._v.shape)
 
         # Create sigma factor for pml
         self._sigma = make_pml_sigma(wave.shape, self._sigma_max, self._pml_thickness)
-        self._sigma_factors = [np.product([s for i, s in enumerate(self._sigma) if i != dim], axis=0)
+        self._sigma_factors = [np.sum([s for i, s in enumerate(self._sigma) if i != dim], axis=0)
                                 for dim in range(len(self._sigma))]
 
     def update(self, Q=0):
@@ -42,12 +43,13 @@ class WaveEquation:
         # Update pressure scalar array
         div_v = divergence(self._v)
         pml_correction = self._dt * self._c * np.sum(self._sigma, axis=0) * self._P
-        # Additional factor using auxilary variables don't seem to be needed ......
+        # Note this additional factor can cause some numerical instability in corners of pml!!!
         # for dim, psi in enumerate(self._psi):
-        #     pml_correction += self._D * self._c2 * self._sigma_factors[dim] * gradient(self._psi[dim], axis=dim)
-        self._P -=  self._D * self._c2 * div_v + pml_correction - Q
+        #     pml_correction += self._D * self._c2 * self._sigma_factors[dim] * gradient(psi, axis=dim)
+        P = (self._P + self._P_1) / 2 - (self._D * self._c2 * div_v + pml_correction - Q)
+        self._P_1 = self._P
+        self._P = P
 
-        # Note auxilary variables don't seem to be needed ......
         # Update auxilary equations for perfectly matched layer correction
         # self._psi += self._dt * self._c * self._v
 
