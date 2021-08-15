@@ -212,7 +212,7 @@ class Simulation:
 
             # Get current source values
             source_current = self._source.value(current_time)
-            source_current = np.pad(source_current, self.grid.pml_thickness, 'constant')
+            source_current = np.pad(source_current, self.grid.pml_thickness, 'edge')
 
             # Compute the next wave values
             self._wave_equation.update(Q=source_current)
